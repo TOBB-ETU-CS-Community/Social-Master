@@ -12,9 +12,19 @@
 
 <hr>
 
-# Delta ChatBot
+# InstaBot
 
-This is a chatbot that answers questions based on uploaded documents.
+Welcome to the Instagram Bot, a tool designed to automate various social media management tasks on Instagram. This bot is developed to assist social media managers, influencers, and businesses in efficiently handling their Instagram accounts.
+
+## Features
+
+Auto-Liking: Automatically like posts based on hashtags, location, or user feeds to boost engagement and visibility.
+
+Auto-Following: Follow users based on interests, followers, or interactions to grow your audience.
+
+Auto-Unfollowing: Unfollow users who haven't followed you back or based on certain criteria.
+
+Auto-Commenting: Engage with users by leaving comments on their posts using customizable templates.
 
 
 ## Table of Contents
@@ -39,13 +49,13 @@ Before setting up the project, ensure that you have the following prerequisites 
 1. Clone the project repository:
 
 ```
-git clone https://github.com/olympian-21/Delta-Chatbot.git
+git clone https://github.com/TOBB-ETU-CS-Community/Insta-Bot.git
 ```
 
 2. Navigate to the project directory:
 
 ```
-cd delta-chatbot
+cd insta_bot
 ```
 
 3. Install project dependencies using Poetry:
@@ -68,7 +78,7 @@ poetry shell
 2. Run the project:
 
 ```
-streamlit run "delta-chatbot/app.py"
+streamlit run "insta_bot/app.py"
 ```
 
 ## Contributing
@@ -96,3 +106,5 @@ If you would like to contribute to this project, follow the guidelines below:
 GPL v3
 
 ---
+
+Happy automating and managing your Instagram account!
