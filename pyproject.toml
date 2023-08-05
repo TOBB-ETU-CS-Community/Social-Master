@@ -8,7 +8,6 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.10"
 streamlit = "^1.25.0"
-instapy = "^0.6.16"
 
 
 [build-system]
