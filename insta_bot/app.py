@@ -100,6 +100,9 @@ class ProfilePage:
 
 def get_driver():
     options = Options()
+    options.add_argument("--no-sandbox")
+    options.add_argument("--headless")
+    options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--ignore-certificate-errors")
     options.add_argument("--incognito")
     options.add_argument("--disable-blink-features=AutomationControlled")
@@ -146,6 +149,8 @@ def main():
                 st.success("Instagram login successful")
             profile_page = login_page.go_to_profile_page(influencer_username)
             profile_page.go_to_followers_window()
+            with container:
+                st.success("Followers dialog opened")
             profile_page.follow_followers(max_count=100)
             with container:
                 st.success("100 followers followed")
