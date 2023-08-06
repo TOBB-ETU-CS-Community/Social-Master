@@ -16,7 +16,7 @@
 
 Welcome to the Instagram Bot, a tool designed to automate various social media management tasks on Instagram. This bot is developed to assist social media managers, influencers, and businesses in efficiently handling their Instagram accounts.
 
-[![WebApp Link](https://insta-bot.streamlit.app/)]
+[WebApp Link](https://insta-bot.streamlit.app/)
 
 ## Features
 
