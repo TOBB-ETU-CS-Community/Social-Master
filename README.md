@@ -16,6 +16,8 @@
 
 Welcome to the Instagram Bot, a tool designed to automate various social media management tasks on Instagram. This bot is developed to assist social media managers, influencers, and businesses in efficiently handling their Instagram accounts.
 
+[![WebApp Link](https://insta-bot.streamlit.app/)]
+
 ## Features
 
 Auto-Liking: Automatically like posts based on hashtags, location, or user feeds to boost engagement and visibility.
