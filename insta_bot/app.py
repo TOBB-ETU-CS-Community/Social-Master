@@ -11,7 +11,7 @@ import streamlit as st
 from webdriver_manager.chrome import ChromeDriverManager
 from modules.utils import add_bg_from_local, set_page_config
 
-DELAY_TIME = 5
+DELAY_TIME = 2
 
 
 class HomePage:

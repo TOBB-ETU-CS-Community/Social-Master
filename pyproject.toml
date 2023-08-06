@@ -10,6 +10,7 @@ python = "^3.10"
 streamlit = "^1.25.0"
 selenium = "^4.11.2"
 webdriver-manager = "^4.0.0"
+seleniumbase = "^4.17.1"
 
 
 [build-system]
