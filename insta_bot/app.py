@@ -51,6 +51,8 @@ class LoginPage:
                 (By.CSS_SELECTOR, "input[name='password']")
             )
         )
+        username_input.clear()
+        password_input.clear()
         username_input.send_keys(username)
         password_input.send_keys(password)
         login_button = self.wait.until(
@@ -135,6 +137,7 @@ def get_driver():
     options = Options()
     options.add_argument("--no-sandbox")
     # options.add_argument("--headless")
+    chrome_options.add_argument("--window-size=1080x1080")
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--ignore-certificate-errors")
     options.add_argument("--incognito")
@@ -144,7 +147,7 @@ def get_driver():
     driver = webdriver.Chrome(
         service=Service(ChromeDriverManager().install()), options=options
     )
-    driver.implicitly_wait(5)
+    driver.implicitly_wait(DELAY_TIME)
     return driver
 
 
