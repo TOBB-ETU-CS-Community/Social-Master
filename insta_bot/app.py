@@ -78,20 +78,30 @@ class LoginPage:
 
 class ProfilePage:
     def __init__(self, driver, wait, username):
-        # time.sleep(DELAY_TIME)
+        time.sleep(DELAY_TIME)
         self.driver = driver
         self.wait = wait
         self.username = username
         self.driver.get(f"https://www.instagram.com/{username}")
 
     def go_to_followers_window(self):
-        # time.sleep(DELAY_TIME)
+        time.sleep(DELAY_TIME)
         followers_button = self.wait.until(
             EC.element_to_be_clickable(
                 (By.CSS_SELECTOR, f"a[href='/{self.username}/followers/']")
             )
         )
         self.driver.execute_script("arguments[0].click();", followers_button)
+        return self.driver
+
+    def go_to_following_window(self):
+        time.sleep(DELAY_TIME)
+        following_button = self.wait.until(
+            EC.element_to_be_clickable(
+                (By.CSS_SELECTOR, f"a[href='/{self.username}/following/']")
+            )
+        )
+        self.driver.execute_script("arguments[0].click();", following_button)
         return self.driver
 
     def follow_followers(self, max_count=100):
@@ -131,9 +141,11 @@ def get_driver():
     options.add_argument("--disable-blink-features=AutomationControlled")
     # options.add_argument("--disable-gpu")
     # options.add_argument("--headless")
-    return webdriver.Chrome(
+    driver = webdriver.Chrome(
         service=Service(ChromeDriverManager().install()), options=options
     )
+    driver.implicitly_wait(5)
+    return driver
 
 
 def main():
@@ -165,10 +177,15 @@ def main():
         max_value=5,
         value=3,
     )
-    if st.button("Login"):
+
+    driver = None
+
+    col1, col2, col3, col4 = st.columns(4)
+    if col2.button("Login & Follow"):
         try:
             container = st.empty()
             driver = get_driver()
+
             wait = WebDriverWait(driver, DELAY_TIME)
             home_page = HomePage(driver, wait)
             with container:
@@ -185,6 +202,27 @@ def main():
             profile_page.follow_followers(max_count=100)
             with container:
                 st.success("100 followers followed")
+        except Exception as e:
+            with container:
+                st.error("An error occured. Please try again.")
+                st.error(e)
+        finally:
+            driver.quit()
+    elif col3.button("Login & Unfollow"):
+        try:
+            container = st.empty()
+            driver = get_driver()
+            wait = WebDriverWait(driver, DELAY_TIME)
+            home_page = HomePage(driver, wait)
+            with container:
+                st.success("Instagram home page opened")
+            login_page = home_page.go_to_login_page()
+            login_page.login(username, password)
+            login_page.close_popups()
+            with container:
+                st.success("Instagram login successful")
+            profile_page = login_page.go_to_profile_page(influencer_username)
+            profile_page.go_to_following_window()
         except Exception as e:
             with container:
                 st.error("An error occured. Please try again.")
