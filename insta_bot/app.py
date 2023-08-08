@@ -94,7 +94,6 @@ class ProfilePage:
             )
         )
         self.driver.execute_script("arguments[0].click();", followers_button)
-        return self.driver
 
     def go_to_following_window(self):
         time.sleep(DELAY_TIME)
@@ -104,7 +103,18 @@ class ProfilePage:
             )
         )
         self.driver.execute_script("arguments[0].click();", following_button)
-        return self.driver
+
+    """
+    def go_to_followings_window(self):
+        time.sleep(DELAY_TIME)
+        followings_button = self.wait.until(
+            EC.visibility_of_element_located(
+                (By.CSS_SELECTOR, f"a[href='/{self.username}/following/']")
+            )
+        )
+        self.driver.execute_script("arguments[0].click();", followings_button)
+        # self.driver.get(f"https://www.instagram.com/{self.username}/following/")
+    """
 
     def follow_followers(self, max_count=100):
         # time.sleep(DELAY_TIME)
@@ -137,13 +147,13 @@ def get_driver():
     options = Options()
     options.add_argument("--no-sandbox")
     # options.add_argument("--headless")
-    chrome_options.add_argument("--window-size=1080x1080")
+    options.add_argument("--window-size=1080x1080")
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--ignore-certificate-errors")
     options.add_argument("--incognito")
     options.add_argument("--disable-blink-features=AutomationControlled")
-    # options.add_argument("--disable-gpu")
-    # options.add_argument("--headless")
+    options.add_argument("--disable-gpu")
+    # chrome_options.add_argument("--disable-extensions")
     driver = webdriver.Chrome(
         service=Service(ChromeDriverManager().install()), options=options
     )
@@ -184,11 +194,14 @@ def main():
     driver = None
 
     col1, col2, col3, col4 = st.columns(4)
-    if col2.button("Login & Follow"):
+    col2.button("Login & Follow", key="follow")
+    col3.button("Login & Unfollow", key="unfollow")
+    container = st.empty()
+    if st.session_state.follow:
         try:
-            container = st.empty()
+            with container:
+                st.success("Automation started")
             driver = get_driver()
-
             wait = WebDriverWait(driver, DELAY_TIME)
             home_page = HomePage(driver, wait)
             with container:
@@ -199,7 +212,8 @@ def main():
             with container:
                 st.success("Instagram login successful")
             profile_page = login_page.go_to_profile_page(influencer_username)
-            profile_page.go_to_followers_window()
+            profile_page.go_to_following_window()
+            # profile_page.go_to_followers_window()
             with container:
                 st.success("Followers dialog opened")
             profile_page.follow_followers(max_count=100)
@@ -209,10 +223,13 @@ def main():
             with container:
                 st.error("An error occured. Please try again.")
                 st.error(e)
+                driver.get_screenshot_as_file("exception.png")
         finally:
             driver.quit()
-    elif col3.button("Login & Unfollow"):
+    if st.session_state.unfollow:
         try:
+            with container:
+                st.success("Automation started")
             container = st.empty()
             driver = get_driver()
             wait = WebDriverWait(driver, DELAY_TIME)
@@ -230,6 +247,7 @@ def main():
             with container:
                 st.error("An error occured. Please try again.")
                 st.error(e)
+                driver.get_screenshot_as_file("exception.png")
         finally:
             driver.quit()
 
