@@ -56,7 +56,7 @@ class LoginPage:
         username_input.send_keys(username)
         password_input.send_keys(password)
         login_button = self.wait.until(
-            EC.element_to_be_clickable((By.XPATH, "//button[@type='submit']"))
+            EC.visibility_of_element_located((By.XPATH, "//button[@type='submit']"))
         )
         self.driver.execute_script("arguments[0].click();", login_button)
 
@@ -64,11 +64,15 @@ class LoginPage:
         time.sleep(DELAY_TIME)
         try:
             not_now_button1 = self.wait.until(
-                EC.element_to_be_clickable((By.XPATH, '//button[text()="Not Now"]'))
+                EC.visibility_of_element_located(
+                    (By.XPATH, '//button[text()="Not Now"]')
+                )
             )
             not_now_button1.click()
             not_now_button2 = self.wait.until(
-                EC.element_to_be_clickable((By.XPATH, '//button[text()="Not Now"]'))
+                EC.visibility_of_element_located(
+                    (By.XPATH, '//button[text()="Not Now"]')
+                )
             )
             not_now_button2.click()
         except Exception as e:
@@ -161,6 +165,18 @@ def get_driver():
     return driver
 
 
+if "login" not in st.session_state:
+    st.session_state.login = False
+if "login_button_clicked" not in st.session_state:
+    st.session_state.login_button_clicked = False
+if "driver" not in st.session_state:
+    st.session_state.driver = None
+
+
+def login_button_callback():
+    st.session_state.login_button_clicked = True
+
+
 def main():
     set_page_config()
 
@@ -178,8 +194,8 @@ def main():
         unsafe_allow_html=True,
     )
 
-    username = st.text_input("Please enter your username:")
-    password = st.text_input("Please enter your password:", type="password")
+    st.text_input("Please enter your username:", key="username")
+    st.text_input("Please enter your password:", type="password", key="password")
     influencer_username = st.text_input(
         "Please enter the username whose followers you want to follow:"
     )
@@ -191,65 +207,53 @@ def main():
         value=3,
     )
 
-    driver = None
+    col1, col2, col3, col4, col5 = st.columns(5)
+    # placeholder = st.empty()
+    col3.button("Login Account", on_click=login_button_callback)
+    if st.session_state.login_button_clicked:
+        try:
+            driver = get_driver()
+            st.session_state.driver = driver
+            wait = WebDriverWait(driver, DELAY_TIME)
+            home_page = HomePage(driver, wait)
+            login_page = home_page.go_to_login_page()
+            login_page.login(st.session_state.username, st.session_state.password)
+            # login_page.close_popups()
 
-    col1, col2, col3, col4 = st.columns(4)
-    col2.button("Login & Follow", key="follow")
-    col3.button("Login & Unfollow", key="unfollow")
-    container = st.empty()
-    if st.session_state.follow:
-        try:
-            with container:
-                st.success("Automation started")
-            driver = get_driver()
-            wait = WebDriverWait(driver, DELAY_TIME)
-            home_page = HomePage(driver, wait)
-            with container:
-                st.success("Instagram home page opened")
-            login_page = home_page.go_to_login_page()
-            login_page.login(username, password)
-            login_page.close_popups()
-            with container:
-                st.success("Instagram login successful")
+            # with placeholder.container():
+            #    st.success("Instagram home page opened")
+
             profile_page = login_page.go_to_profile_page(influencer_username)
-            profile_page.go_to_following_window()
-            # profile_page.go_to_followers_window()
-            with container:
-                st.success("Followers dialog opened")
-            profile_page.follow_followers(max_count=100)
-            with container:
-                st.success("100 followers followed")
+            # with placeholder.container():
+            #    st.success("Instagram login successful")
+            st.session_state.login = True
+
+            st.write(st.session_state.login)
+            if col2.button("Follow"):
+                profile_page = login_page.go_to_profile_page(influencer_username)
+                profile_page.go_to_followers_window()
+                with placeholder.container():
+                    st.success("Followers dialog opened")
+                profile_page.follow_followers(max_count=100)
+                with placeholder.container():
+                    st.success("100 followers followed")
+            if col4.button("Unfollow"):
+                profile_page = login_page.go_to_profile_page(username)
+                profile_page.go_to_following_window()
+                with placeholder.container():
+                    st.success("Followers dialog opened")
+                # profile_page.follow_followers(max_count=100)
+                with placeholder.container():
+                    st.success("100 followings unfollowed")
         except Exception as e:
-            with container:
-                st.error("An error occured. Please try again.")
+            with container1:
+                st.error("An exception occured. Please try again.")
                 st.error(e)
-                driver.get_screenshot_as_file("exception.png")
+                st.session_state.driver.get_screenshot_as_file("exception.png")
         finally:
-            driver.quit()
-    if st.session_state.unfollow:
-        try:
-            with container:
-                st.success("Automation started")
-            container = st.empty()
-            driver = get_driver()
-            wait = WebDriverWait(driver, DELAY_TIME)
-            home_page = HomePage(driver, wait)
-            with container:
-                st.success("Instagram home page opened")
-            login_page = home_page.go_to_login_page()
-            login_page.login(username, password)
-            login_page.close_popups()
-            with container:
-                st.success("Instagram login successful")
-            profile_page = login_page.go_to_profile_page(influencer_username)
-            profile_page.go_to_following_window()
-        except Exception as e:
-            with container:
-                st.error("An error occured. Please try again.")
-                st.error(e)
-                driver.get_screenshot_as_file("exception.png")
-        finally:
-            driver.quit()
+            st.error("An error occured. Please restart.")
+            st.session_state.driver.get_screenshot_as_file("error.png")
+            st.session_state.driver.quit()
 
 
 if __name__ == "__main__":
