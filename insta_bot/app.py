@@ -70,9 +70,7 @@ class LoginPage:
             )
             not_now_button1.click()
             not_now_button2 = self.wait.until(
-                EC.visibility_of_element_located(
-                    (By.XPATH, '//button[text()="Not Now"]')
-                )
+                EC.visibility_of_element_located((By.XPATH, '//div[text()="Not Now"]'))
             )
             not_now_button2.click()
         except Exception as e:
@@ -101,12 +99,25 @@ class ProfilePage:
 
     def go_to_following_window(self):
         time.sleep(DELAY_TIME)
+        """
         following_button = self.wait.until(
             EC.element_to_be_clickable(
                 (By.CSS_SELECTOR, f"a[href='/{self.username}/following/']")
             )
         )
         self.driver.execute_script("arguments[0].click();", following_button)
+        """
+        following_button = self.wait.until(
+            EC.visibility_of_element_located(
+                (By.CSS_SELECTOR, f'a[href="/{self.user_name.lower()}/following/"]')
+            )
+        )
+        self.driver.execute_script("arguments[0].click();", following_button)
+
+        # not_now_button2 = self.wait.until(EC.visibility_of_element_located())
+        # self.driver.get(f"https://www.instagram.com/{self.username}/followers/")
+        # time.sleep(DELAY_TIME)
+        # self.driver.get(f"https://www.instagram.com/{self.username}/following/")
 
     """
     def go_to_followings_window(self):
@@ -171,6 +182,12 @@ if "login_button_clicked" not in st.session_state:
     st.session_state.login_button_clicked = False
 if "driver" not in st.session_state:
     st.session_state.driver = None
+if "home_page" not in st.session_state:
+    st.session_state.home_page = None
+if "login_page" not in st.session_state:
+    st.session_state.login_page = None
+if "profile_page" not in st.session_state:
+    st.session_state.profile_page = None
 
 
 def login_button_callback():
@@ -196,8 +213,9 @@ def main():
 
     st.text_input("Please enter your username:", key="username")
     st.text_input("Please enter your password:", type="password", key="password")
-    influencer_username = st.text_input(
-        "Please enter the username whose followers you want to follow:"
+    st.text_input(
+        "Please enter the username whose followers you want to follow:",
+        key="influencer_username",
     )
     global DELAY_TIME
     DELAY_TIME = st.number_input(
@@ -207,38 +225,40 @@ def main():
         value=3,
     )
 
-    col1, col2, col3, col4, col5 = st.columns(5)
-    # placeholder = st.empty()
-    col3.button("Login Account", on_click=login_button_callback)
+    _, _, col3, _, _ = st.columns(5)
+    button = col3.button("Login Account", on_click=login_button_callback)
+    _, col2, _, col4, _ = st.columns(5)
+    placeholder = st.empty()
     if st.session_state.login_button_clicked:
         try:
-            driver = get_driver()
-            st.session_state.driver = driver
-            wait = WebDriverWait(driver, DELAY_TIME)
-            home_page = HomePage(driver, wait)
-            login_page = home_page.go_to_login_page()
-            login_page.login(st.session_state.username, st.session_state.password)
-            # login_page.close_popups()
-
-            # with placeholder.container():
-            #    st.success("Instagram home page opened")
-
-            profile_page = login_page.go_to_profile_page(influencer_username)
-            # with placeholder.container():
-            #    st.success("Instagram login successful")
-            st.session_state.login = True
-
-            st.write(st.session_state.login)
+            if not st.session_state.login:
+                driver = get_driver()
+                st.session_state.driver = driver
+                wait = WebDriverWait(driver, DELAY_TIME)
+                home_page = HomePage(driver, wait)
+                st.session_state.home_page = home_page
+                with placeholder.container():
+                    st.success("Instagram home page opened")
+                login_page = home_page.go_to_login_page()
+                st.session_state.login_page = login_page
+                login_page.login(st.session_state.username, st.session_state.password)
+                login_page.close_popups()
+                with placeholder.container():
+                    st.success("Instagram login successful")
+                st.session_state.login = True
             if col2.button("Follow"):
-                profile_page = login_page.go_to_profile_page(influencer_username)
-                profile_page.go_to_followers_window()
+                login_page = st.session_state.login_page
+                profile_page = login_page.go_to_profile_page(st.session_state.username)
+                # profile_page.go_to_followers_window()
+                profile_page.go_to_following_window()
                 with placeholder.container():
                     st.success("Followers dialog opened")
-                profile_page.follow_followers(max_count=100)
+                # profile_page.follow_followers(max_count=100)
                 with placeholder.container():
                     st.success("100 followers followed")
             if col4.button("Unfollow"):
-                profile_page = login_page.go_to_profile_page(username)
+                login_page = st.session_state.login_page
+                profile_page = login_page.go_to_profile_page(st.session_state.username)
                 profile_page.go_to_following_window()
                 with placeholder.container():
                     st.success("Followers dialog opened")
@@ -246,14 +266,10 @@ def main():
                 with placeholder.container():
                     st.success("100 followings unfollowed")
         except Exception as e:
-            with container1:
+            with placeholder.container():
                 st.error("An exception occured. Please try again.")
                 st.error(e)
                 st.session_state.driver.get_screenshot_as_file("exception.png")
-        finally:
-            st.error("An error occured. Please restart.")
-            st.session_state.driver.get_screenshot_as_file("error.png")
-            st.session_state.driver.quit()
 
 
 if __name__ == "__main__":
