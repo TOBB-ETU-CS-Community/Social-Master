@@ -60,22 +60,6 @@ class LoginPage:
         )
         self.driver.execute_script("arguments[0].click();", login_button)
 
-    def close_popups(self):
-        time.sleep(DELAY_TIME)
-        try:
-            not_now_button1 = self.wait.until(
-                EC.visibility_of_element_located(
-                    (By.XPATH, '//button[text()="Not Now"]')
-                )
-            )
-            not_now_button1.click()
-            not_now_button2 = self.wait.until(
-                EC.visibility_of_element_located((By.XPATH, '//div[text()="Not Now"]'))
-            )
-            not_now_button2.click()
-        except Exception as e:
-            print(e)
-
     def go_to_profile_page(self, username):
         return ProfilePage(self.driver, self.wait, username)
 
@@ -86,76 +70,57 @@ class ProfilePage:
         self.driver = driver
         self.wait = wait
         self.username = username
-        self.driver.get(f"https://www.instagram.com/{username}")
 
     def go_to_followers_window(self):
         time.sleep(DELAY_TIME)
-        followers_button = self.wait.until(
-            EC.element_to_be_clickable(
-                (By.CSS_SELECTOR, f"a[href='/{self.username}/followers/']")
-            )
-        )
-        self.driver.execute_script("arguments[0].click();", followers_button)
+        self.driver.get(f"https://www.instagram.com/{self.username}/followers/")
 
     def go_to_following_window(self):
         time.sleep(DELAY_TIME)
-        """
-        following_button = self.wait.until(
-            EC.element_to_be_clickable(
-                (By.CSS_SELECTOR, f"a[href='/{self.username}/following/']")
-            )
-        )
-        self.driver.execute_script("arguments[0].click();", following_button)
-        """
-        following_button = self.wait.until(
-            EC.visibility_of_element_located(
-                (By.CSS_SELECTOR, f'a[href="/{self.user_name.lower()}/following/"]')
-            )
-        )
-        self.driver.execute_script("arguments[0].click();", following_button)
+        self.driver.get(f"https://www.instagram.com/{self.username}/following/")
 
-        # not_now_button2 = self.wait.until(EC.visibility_of_element_located())
-        # self.driver.get(f"https://www.instagram.com/{self.username}/followers/")
-        # time.sleep(DELAY_TIME)
-        # self.driver.get(f"https://www.instagram.com/{self.username}/following/")
-
-    """
-    def go_to_followings_window(self):
+    def unfollow_following(self, max_count=100):
         time.sleep(DELAY_TIME)
-        followings_button = self.wait.until(
-            EC.visibility_of_element_located(
-                (By.CSS_SELECTOR, f"a[href='/{self.username}/following/']")
-            )
-        )
-        self.driver.execute_script("arguments[0].click();", followings_button)
-        # self.driver.get(f"https://www.instagram.com/{self.username}/following/")
-    """
-
-    def follow_followers(self, max_count=100):
-        # time.sleep(DELAY_TIME)
-        followers_dialog = self.wait.until(
+        dialog_window = self.wait.until(
             EC.visibility_of_element_located((By.XPATH, "//div[@class='_aano']"))
         )
-
-        visible_followers_list = self.wait.until(
-            EC.visibility_of_any_elements_located((By.TAG_NAME, "li"))
-        )
-        visible_followers = len(visible_followers_list)
-        for _ in range(max_count // visible_followers + 1):
+        for _ in range(max_count // 5 + 1):
             self.driver.execute_script(
                 "arguments[0].scrollTop = arguments[0].scrollTop + arguments[0].offsetHeight;",
-                followers_dialog,
+                dialog_window,
             )
-            # time.sleep(1)
-        print("Scroll down finished")
+        unfollow_buttons = self.wait.until(
+            EC.visibility_of_any_elements_located((By.XPATH, "//*[text()='Following']"))
+        )
+        for i in range(1, len(unfollow_buttons)):
+            unfollow_button1 = unfollow_buttons[i]
+            self.driver.execute_script("arguments[0].click();", unfollow_button1)
+            time.sleep(1)
+            unfollow_button2 = self.wait.until(
+                EC.visibility_of_element_located((By.XPATH, "//*[text()='Unfollow']"))
+            )
+            self.driver.execute_script("arguments[0].click();", unfollow_button2)
+            time.sleep(1)
+        return len(unfollow_buttons) - 1
+
+    def follow_followers(self, max_count=100):
+        time.sleep(DELAY_TIME)
+        dialog_window = self.wait.until(
+            EC.visibility_of_element_located((By.XPATH, "//div[@class='_aano']"))
+        )
+        for _ in range(max_count // 5 + 1):
+            self.driver.execute_script(
+                "arguments[0].scrollTop = arguments[0].scrollTop + arguments[0].offsetHeight;",
+                dialog_window,
+            )
         follow_buttons = self.wait.until(
             EC.visibility_of_any_elements_located((By.XPATH, "//*[text()='Follow']"))
         )
-        print(f"{len(follow_buttons)} profile will be followed")
-        for follow_button in follow_buttons:
+        for i in range(1, len(follow_buttons)):
+            follow_button = follow_buttons[i]
             self.driver.execute_script("arguments[0].click();", follow_button)
-            # time.sleep(1)
-        print(f"{len(follow_buttons)} profile were followed")
+            time.sleep(1)
+        return len(follow_buttons) - 1
 
 
 def get_driver():
@@ -241,30 +206,35 @@ def main():
                     st.success("Instagram home page opened")
                 login_page = home_page.go_to_login_page()
                 st.session_state.login_page = login_page
-                login_page.login(st.session_state.username, st.session_state.password)
-                login_page.close_popups()
+                login_page.login(
+                    st.session_state.username.lower(), st.session_state.password
+                )
                 with placeholder.container():
                     st.success("Instagram login successful")
                 st.session_state.login = True
+            time.sleep(DELAY_TIME)
             if col2.button("Follow"):
                 login_page = st.session_state.login_page
-                profile_page = login_page.go_to_profile_page(st.session_state.username)
-                # profile_page.go_to_followers_window()
-                profile_page.go_to_following_window()
+                profile_page = login_page.go_to_profile_page(
+                    st.session_state.influencer_username
+                )
+                profile_page.go_to_followers_window()
                 with placeholder.container():
                     st.success("Followers dialog opened")
-                # profile_page.follow_followers(max_count=100)
+                followed_number = profile_page.follow_followers(max_count=100)
                 with placeholder.container():
-                    st.success("100 followers followed")
+                    st.success(f"{followed_number} followers followed")
             if col4.button("Unfollow"):
                 login_page = st.session_state.login_page
-                profile_page = login_page.go_to_profile_page(st.session_state.username)
+                profile_page = login_page.go_to_profile_page(
+                    st.session_state.username.lower()
+                )
                 profile_page.go_to_following_window()
                 with placeholder.container():
-                    st.success("Followers dialog opened")
-                # profile_page.follow_followers(max_count=100)
+                    st.success("Following dialog opened")
+                unfollowed_number = profile_page.unfollow_following(max_count=100)
                 with placeholder.container():
-                    st.success("100 followings unfollowed")
+                    st.success(f"{unfollowed_number} followings unfollowed")
         except Exception as e:
             with placeholder.container():
                 st.error("An exception occured. Please try again.")
