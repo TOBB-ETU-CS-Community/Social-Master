@@ -76,6 +76,30 @@ class ExplorePage:
         for hashtag in hashtags:
             self.driver.get(f"https://www.instagram.com/explore/tags/{hashtag}/")
             time.sleep(DELAY_TIME)
+            posts = self.wait.until(
+                EC.visibility_of_any_elements_located(
+                    (By.XPATH, "//div[@class='_aagu']")
+                )
+            )
+            print("entering")
+            for i in range(len(posts)):
+                post = posts[i]
+                self.driver.execute_script("arguments[0].click();", post)
+                print("post")
+                time.sleep(1)
+                buttons = self.wait.until(
+                    EC.visibility_of_any_elements_located(
+                        (
+                            By.XPATH,
+                            "//div[@class='x6s0dn4 x78zum5 xdt5ytf xl56j7k']",
+                        )
+                    )
+                )
+                like_button = buttons[2]
+                print("liking")
+                self.driver.execute_script("arguments[0].click();", like_button)
+                print("liked")
+                time.sleep(1)
 
 
 class ProfilePage:
