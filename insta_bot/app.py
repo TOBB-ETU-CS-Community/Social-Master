@@ -101,6 +101,10 @@ class ProfilePage:
             )
             self.driver.execute_script("arguments[0].click();", unfollow_button2)
             time.sleep(1)
+        close_button = self.wait.until(
+            EC.visibility_of_element_located((By.XPATH, "//button[@class='_abl-']"))
+        )
+        self.driver.execute_script("arguments[0].click();", close_button)
         return len(unfollow_buttons) - 1
 
     def follow_followers(self, max_count=100):
@@ -120,6 +124,10 @@ class ProfilePage:
             follow_button = follow_buttons[i]
             self.driver.execute_script("arguments[0].click();", follow_button)
             time.sleep(1)
+        close_button = self.wait.until(
+            EC.visibility_of_element_located((By.XPATH, "//button[@class='_abl-']"))
+        )
+        self.driver.execute_script("arguments[0].click();", close_button)
         return len(follow_buttons) - 1
 
 
