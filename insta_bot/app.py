@@ -18,11 +18,11 @@ DELAY_TIME = 2
 class HomePage:
     def __init__(self, driver, wait):
         self.driver = driver
-        self.driver.get("https://www.instagram.com/")
         self.wait = wait
 
     def go_to_login_page(self):
         try:
+            self.driver.get("https://www.instagram.com/")
             # time.sleep(DELAY_TIME)
             goto_login_button = wait.until(
                 EC.element_to_be_clickable((By.XPATH, "//a[text()='Log in']"))
@@ -60,8 +60,8 @@ class LoginPage:
         )
         self.driver.execute_script("arguments[0].click();", login_button)
 
-    def go_to_profile_page(self, username):
-        return ProfilePage(self.driver, self.wait, username)
+    def go_to_profile_page(self):
+        return ProfilePage(self.driver, self.wait)
 
     def go_to_explore_page(self):
         return ExplorePage(self.driver, self.wait)
@@ -85,7 +85,6 @@ class ExplorePage:
             for i in range(len(posts)):
                 post = posts[i]
                 self.driver.execute_script("arguments[0].click();", post)
-                print("post")
                 time.sleep(1)
                 buttons = self.wait.until(
                     EC.visibility_of_any_elements_located(
@@ -96,25 +95,22 @@ class ExplorePage:
                     )
                 )
                 like_button = buttons[2]
-                print("liking")
                 self.driver.execute_script("arguments[0].click();", like_button)
-                print("liked")
                 time.sleep(1)
 
 
 class ProfilePage:
-    def __init__(self, driver, wait, username):
+    def __init__(self, driver, wait):
         self.driver = driver
         self.wait = wait
-        self.username = username
 
-    def go_to_followers_window(self):
+    def go_to_followers_window(self, username):
         time.sleep(DELAY_TIME)
-        self.driver.get(f"https://www.instagram.com/{self.username}/followers/")
+        self.driver.get(f"https://www.instagram.com/{username}/followers/")
 
-    def go_to_following_window(self):
+    def go_to_following_window(self, username):
         time.sleep(DELAY_TIME)
-        self.driver.get(f"https://www.instagram.com/{self.username}/following/")
+        self.driver.get(f"https://www.instagram.com/{username}/following/")
 
     def unfollow_following(self, max_count=100):
         time.sleep(DELAY_TIME)
@@ -258,28 +254,29 @@ def main():
                     st.success("Instagram login successful")
                 st.session_state.login = True
             time.sleep(DELAY_TIME)
-            if col2.button("Follow"):
+            follow = col2.button("Follow")
+            like = col3.button("Like Posts")
+            unfollow = col4.button("Unfollow")
+            if follow:
                 login_page = st.session_state.login_page
-                profile_page = login_page.go_to_profile_page(
+                profile_page = login_page.go_to_profile_page()
+                profile_page.go_to_followers_window(
                     st.session_state.influencer_username
                 )
-                profile_page.go_to_followers_window()
                 with placeholder.container():
                     st.success("Followers dialog opened")
                 followed_number = profile_page.follow_followers(max_count=100)
                 with placeholder.container():
                     st.success(f"{followed_number} followers followed")
-            if col3.button("Like Posts"):
+            if like:
                 login_page = st.session_state.login_page
                 explore_page = login_page.go_to_explore_page()
                 hashtags = ["blockchain", "ai"]
                 explore_page.like_tags(hashtags)
-            if col4.button("Unfollow"):
+            if unfollow:
                 login_page = st.session_state.login_page
-                profile_page = login_page.go_to_profile_page(
-                    st.session_state.username.lower()
-                )
-                profile_page.go_to_following_window()
+                profile_page = login_page.go_to_profile_page()
+                profile_page.go_to_following_window(st.session_state.username.lower())
                 with placeholder.container():
                     st.success("Following dialog opened")
                 unfollowed_number = profile_page.unfollow_following(max_count=100)
