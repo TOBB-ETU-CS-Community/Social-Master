@@ -63,10 +63,23 @@ class LoginPage:
     def go_to_profile_page(self, username):
         return ProfilePage(self.driver, self.wait, username)
 
+    def go_to_explore_page(self):
+        return ExplorePage(self.driver, self.wait)
+
+
+class ExplorePage:
+    def __init__(self, driver, wait):
+        self.driver = driver
+        self.wait = wait
+
+    def like_tags(self, hashtags, like_count=5):
+        for hashtag in hashtags:
+            self.driver.get(f"https://www.instagram.com/explore/tags/{hashtag}/")
+            time.sleep(DELAY_TIME)
+
 
 class ProfilePage:
     def __init__(self, driver, wait, username):
-        time.sleep(DELAY_TIME)
         self.driver = driver
         self.wait = wait
         self.username = username
@@ -198,9 +211,9 @@ def main():
         value=3,
     )
 
-    _, _, col3, _, _ = st.columns(5)
-    button = col3.button("Login Account", on_click=login_button_callback)
-    _, col2, _, col4, _ = st.columns(5)
+    _, _, center_col, _, _ = st.columns(5)
+    button = center_col.button("Login Account", on_click=login_button_callback)
+    _, col2, col3, col4, _ = st.columns(5)
     placeholder = st.empty()
     if st.session_state.login_button_clicked:
         try:
@@ -232,6 +245,11 @@ def main():
                 followed_number = profile_page.follow_followers(max_count=100)
                 with placeholder.container():
                     st.success(f"{followed_number} followers followed")
+            if col3.button("Like Posts"):
+                login_page = st.session_state.login_page
+                explore_page = login_page.go_to_explore_page()
+                hashtags = ["blockchain", "ai"]
+                explore_page.like_tags(hashtags)
             if col4.button("Unfollow"):
                 login_page = st.session_state.login_page
                 profile_page = login_page.go_to_profile_page(
