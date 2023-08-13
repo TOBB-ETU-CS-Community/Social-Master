@@ -269,7 +269,12 @@ def main():
                     "Please enter the username whose followers you want to follow:",
                     key="influencer_username",
                 )
-            _, center_col, _ = st.columns(3)
+            elif operation == "Like":
+                center_col.text_input(
+                    "Please write the hashtags that you want to like, separated by space:",
+                    key="hashtags",
+                )
+            _, center_col, _ = st.columns([4, 5, 2])
             start = center_col.button("Start the automation")
             placeholder = st.empty()
             if start and operation == "Follow":
@@ -286,7 +291,7 @@ def main():
             elif start and operation == "Like":
                 login_page = st.session_state.login_page
                 explore_page = login_page.go_to_explore_page()
-                hashtags = ["blockchain", "ai"]
+                hashtags = st.session_state.hashtags.split(" ")
                 explore_page.like_tags(hashtags)
             elif start and operation == "Unfollow":
                 login_page = st.session_state.login_page
