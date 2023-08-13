@@ -197,7 +197,25 @@ if "profile_page" not in st.session_state:
 
 
 def login_button_callback():
-    st.session_state.login_button_clicked = True
+    try:
+        st.session_state.login_button_clicked = True
+        driver = get_driver()
+        st.session_state.driver = driver
+        wait = WebDriverWait(driver, DELAY_TIME)
+        home_page = HomePage(driver, wait)
+        st.session_state.home_page = home_page
+        placeholder = st.sidebar.empty()
+        with placeholder.container():
+            st.success("Instagram home page opened")
+        login_page = home_page.go_to_login_page()
+        st.session_state.login_page = login_page
+        login_page.login(st.session_state.username.lower(), st.session_state.password)
+        with placeholder.container():
+            st.success("Instagram login successful")
+        st.session_state.login = True
+    except Exception as e:
+        st.sidebar.error("An error occured. Please try again to login.")
+        st.siderbar.error(e)
 
 
 def main():
@@ -217,47 +235,26 @@ def main():
         unsafe_allow_html=True,
     )
 
-    st.text_input("Please enter your username:", key="username")
-    st.text_input("Please enter your password:", type="password", key="password")
-    st.text_input(
-        "Please enter the username whose followers you want to follow:",
-        key="influencer_username",
-    )
+    with st.sidebar:
+        st.text_input("Please enter your username:", key="username")
+        st.text_input("Please enter your password:", type="password", key="password")
+        button = st.button("Login Account", on_click=login_button_callback)
     global DELAY_TIME
-    DELAY_TIME = st.number_input(
-        "Please enter the delay amount before opening each page:",
-        min_value=1,
-        max_value=5,
-        value=3,
-    )
 
-    _, _, center_col, _, _ = st.columns(5)
-    button = center_col.button("Login Account", on_click=login_button_callback)
     _, col2, col3, col4, _ = st.columns(5)
-    placeholder = st.empty()
-    if st.session_state.login_button_clicked:
+
+    if st.session_state.login:
         try:
-            if not st.session_state.login:
-                driver = get_driver()
-                st.session_state.driver = driver
-                wait = WebDriverWait(driver, DELAY_TIME)
-                home_page = HomePage(driver, wait)
-                st.session_state.home_page = home_page
-                with placeholder.container():
-                    st.success("Instagram home page opened")
-                login_page = home_page.go_to_login_page()
-                st.session_state.login_page = login_page
-                login_page.login(
-                    st.session_state.username.lower(), st.session_state.password
-                )
-                with placeholder.container():
-                    st.success("Instagram login successful")
-                st.session_state.login = True
             time.sleep(DELAY_TIME)
-            follow = col2.button("Follow")
-            like = col3.button("Like Posts")
-            unfollow = col4.button("Unfollow")
-            if follow:
+            operation = st.selectbox(
+                "Please select the operation you want",
+                ["<Select>", "Follow", "Like", "Unfollow"],
+            )
+            if operation == "Follow":
+                st.text_input(
+                    "Please enter the username whose followers you want to follow:",
+                    key="influencer_username",
+                )
                 login_page = st.session_state.login_page
                 profile_page = login_page.go_to_profile_page()
                 profile_page.go_to_followers_window(
@@ -268,12 +265,12 @@ def main():
                 followed_number = profile_page.follow_followers(max_count=100)
                 with placeholder.container():
                     st.success(f"{followed_number} followers followed")
-            if like:
+            elif operation == "Like":
                 login_page = st.session_state.login_page
                 explore_page = login_page.go_to_explore_page()
                 hashtags = ["blockchain", "ai"]
                 explore_page.like_tags(hashtags)
-            if unfollow:
+            elif operation == "Unfollow":
                 login_page = st.session_state.login_page
                 profile_page = login_page.go_to_profile_page()
                 profile_page.go_to_following_window(st.session_state.username.lower())
@@ -287,6 +284,8 @@ def main():
                 st.error("An exception occured. Please try again.")
                 st.error(e)
                 st.session_state.driver.get_screenshot_as_file("exception.png")
+    else:
+        st.warning("Please login first.")
 
 
 if __name__ == "__main__":
