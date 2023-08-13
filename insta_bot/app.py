@@ -12,8 +12,6 @@ from webdriver_manager.chrome import ChromeDriverManager
 from modules.utils import add_bg_from_local, set_page_config
 from selenium.webdriver.support import expected_conditions as EC
 
-DELAY_TIME = 2
-
 
 class HomePage:
     def __init__(self, driver, wait):
@@ -23,12 +21,10 @@ class HomePage:
     def go_to_login_page(self):
         try:
             self.driver.get("https://www.instagram.com/")
-            # time.sleep(DELAY_TIME)
             goto_login_button = wait.until(
                 EC.element_to_be_clickable((By.XPATH, "//a[text()='Log in']"))
             )
             self.driver.execute_script("arguments[0].click();", goto_login_button)
-            # self.driver.find_element.click()
         except:
             pass
         return LoginPage(self.driver, self.wait)
@@ -40,7 +36,6 @@ class LoginPage:
         self.wait = wait
 
     def login(self, username, password):
-        # time.sleep(DELAY_TIME)
         username_input = self.wait.until(
             EC.visibility_of_element_located(
                 (By.CSS_SELECTOR, "input[name='username']")
@@ -75,17 +70,16 @@ class ExplorePage:
     def like_tags(self, hashtags, like_count=5):
         for hashtag in hashtags:
             self.driver.get(f"https://www.instagram.com/explore/tags/{hashtag}/")
-            time.sleep(DELAY_TIME)
+            get_random_delay()
             posts = self.wait.until(
                 EC.visibility_of_any_elements_located(
                     (By.XPATH, "//div[@class='_aagu']")
                 )
             )
-            print("entering")
             for i in range(len(posts)):
                 post = posts[i]
                 self.driver.execute_script("arguments[0].click();", post)
-                time.sleep(1)
+                get_random_delay()
                 buttons = self.wait.until(
                     EC.visibility_of_any_elements_located(
                         (
@@ -96,7 +90,7 @@ class ExplorePage:
                 )
                 like_button = buttons[2]
                 self.driver.execute_script("arguments[0].click();", like_button)
-                time.sleep(1)
+                get_random_delay()
 
 
 class ProfilePage:
@@ -105,15 +99,15 @@ class ProfilePage:
         self.wait = wait
 
     def go_to_followers_window(self, username):
-        time.sleep(DELAY_TIME)
+        get_random_delay()
         self.driver.get(f"https://www.instagram.com/{username}/followers/")
 
     def go_to_following_window(self, username):
-        time.sleep(DELAY_TIME)
+        get_random_delay()
         self.driver.get(f"https://www.instagram.com/{username}/following/")
 
     def unfollow_following(self, max_count=100):
-        time.sleep(DELAY_TIME)
+        get_random_delay()
         dialog_window = self.wait.until(
             EC.visibility_of_element_located((By.XPATH, "//div[@class='_aano']"))
         )
@@ -128,12 +122,12 @@ class ProfilePage:
         for i in range(1, len(unfollow_buttons)):
             unfollow_button1 = unfollow_buttons[i]
             self.driver.execute_script("arguments[0].click();", unfollow_button1)
-            time.sleep(1)
+            get_random_delay()
             unfollow_button2 = self.wait.until(
                 EC.visibility_of_element_located((By.XPATH, "//*[text()='Unfollow']"))
             )
             self.driver.execute_script("arguments[0].click();", unfollow_button2)
-            time.sleep(1)
+            get_random_delay()
         close_button = self.wait.until(
             EC.visibility_of_element_located((By.XPATH, "//button[@class='_abl-']"))
         )
@@ -141,7 +135,7 @@ class ProfilePage:
         return len(unfollow_buttons) - 1
 
     def follow_followers(self, max_count=100):
-        time.sleep(DELAY_TIME)
+        get_random_delay()
         dialog_window = self.wait.until(
             EC.visibility_of_element_located((By.XPATH, "//div[@class='_aano']"))
         )
@@ -156,7 +150,7 @@ class ProfilePage:
         for i in range(1, len(follow_buttons)):
             follow_button = follow_buttons[i]
             self.driver.execute_script("arguments[0].click();", follow_button)
-            time.sleep(1)
+            get_random_delay()
         close_button = self.wait.until(
             EC.visibility_of_element_located((By.XPATH, "//button[@class='_abl-']"))
         )
@@ -178,7 +172,7 @@ def get_driver():
     driver = webdriver.Chrome(
         service=Service(ChromeDriverManager().install()), options=options
     )
-    driver.implicitly_wait(DELAY_TIME)
+    driver.implicitly_wait(10)
     return driver
 
 
@@ -204,7 +198,7 @@ def start_automation():
     try:
         driver = get_driver()
         st.session_state.driver = driver
-        wait = WebDriverWait(driver, DELAY_TIME)
+        wait = WebDriverWait(driver, 10)
         home_page = HomePage(driver, wait)
         st.session_state.home_page = home_page
         login_page = home_page.go_to_login_page()
@@ -216,6 +210,11 @@ def start_automation():
         st.session_state.login = False
     finally:
         return st.session_state.login
+
+
+def get_random_delay(delays: list[float] = [1, 1.5, 2, 2.5, 3]):
+    delay = random.choice(delays)
+    time.sleep(delay)
 
 
 def main():
@@ -248,24 +247,23 @@ def main():
             else:
                 with placeholder.container():
                     st.error("An error occured. Please try again to login.")
-    global DELAY_TIME
-
     if st.session_state.login:
         try:
-            time.sleep(DELAY_TIME)
+            get_random_delay()
             _, center_col, _ = st.columns([1, 3, 1])
             operation = center_col.selectbox(
                 "Please select the operation you want",
                 ["<Select>", "Follow", "Like", "Unfollow"],
             )
+            if operation == "Follow":
+                center_col.text_input(
+                    "Please enter the username whose followers you want to follow:",
+                    key="influencer_username",
+                )
             _, center_col, _ = st.columns(3)
             start = center_col.button("Start the automation")
             placeholder = st.empty()
             if start and operation == "Follow":
-                st.text_input(
-                    "Please enter the username whose followers you want to follow:",
-                    key="influencer_username",
-                )
                 login_page = st.session_state.login_page
                 profile_page = login_page.go_to_profile_page()
                 profile_page.go_to_followers_window(
