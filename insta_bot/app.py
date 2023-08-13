@@ -197,25 +197,25 @@ if "profile_page" not in st.session_state:
 
 
 def login_button_callback():
+    st.session_state.login_button_clicked = True
+
+
+def start_automation():
     try:
-        st.session_state.login_button_clicked = True
         driver = get_driver()
         st.session_state.driver = driver
         wait = WebDriverWait(driver, DELAY_TIME)
         home_page = HomePage(driver, wait)
         st.session_state.home_page = home_page
-        placeholder = st.sidebar.empty()
-        with placeholder.container():
-            st.success("Instagram home page opened")
         login_page = home_page.go_to_login_page()
         st.session_state.login_page = login_page
         login_page.login(st.session_state.username.lower(), st.session_state.password)
-        with placeholder.container():
-            st.success("Instagram login successful")
         st.session_state.login = True
     except Exception as e:
-        st.sidebar.error("An error occured. Please try again to login.")
-        st.siderbar.error(e)
+        print(e)
+        st.session_state.login = False
+    finally:
+        return st.session_state.login
 
 
 def main():
@@ -239,18 +239,29 @@ def main():
         st.text_input("Please enter your username:", key="username")
         st.text_input("Please enter your password:", type="password", key="password")
         button = st.button("Login Account", on_click=login_button_callback)
+        if button:
+            login_status = start_automation()
+            placeholder = st.sidebar.empty()
+            if login_status:
+                with placeholder.container():
+                    st.success("Instagram login successful")
+            else:
+                with placeholder.container():
+                    st.error("An error occured. Please try again to login.")
     global DELAY_TIME
-
-    _, col2, col3, col4, _ = st.columns(5)
 
     if st.session_state.login:
         try:
             time.sleep(DELAY_TIME)
-            operation = st.selectbox(
+            _, center_col, _ = st.columns([1, 3, 1])
+            operation = center_col.selectbox(
                 "Please select the operation you want",
                 ["<Select>", "Follow", "Like", "Unfollow"],
             )
-            if operation == "Follow":
+            _, center_col, _ = st.columns(3)
+            start = center_col.button("Start the automation")
+            placeholder = st.empty()
+            if start and operation == "Follow":
                 st.text_input(
                     "Please enter the username whose followers you want to follow:",
                     key="influencer_username",
@@ -265,12 +276,12 @@ def main():
                 followed_number = profile_page.follow_followers(max_count=100)
                 with placeholder.container():
                     st.success(f"{followed_number} followers followed")
-            elif operation == "Like":
+            elif start and operation == "Like":
                 login_page = st.session_state.login_page
                 explore_page = login_page.go_to_explore_page()
                 hashtags = ["blockchain", "ai"]
                 explore_page.like_tags(hashtags)
-            elif operation == "Unfollow":
+            elif start and operation == "Unfollow":
                 login_page = st.session_state.login_page
                 profile_page = login_page.go_to_profile_page()
                 profile_page.go_to_following_window(st.session_state.username.lower())
