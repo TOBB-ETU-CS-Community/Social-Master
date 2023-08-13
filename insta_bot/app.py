@@ -13,6 +13,20 @@ from modules.utils import add_bg_from_local, set_page_config
 from selenium.webdriver.support import expected_conditions as EC
 
 
+if "login" not in st.session_state:
+    st.session_state.login = False
+if "login_button_clicked" not in st.session_state:
+    st.session_state.login_button_clicked = False
+if "driver" not in st.session_state:
+    st.session_state.driver = None
+if "home_page" not in st.session_state:
+    st.session_state.home_page = None
+if "login_page" not in st.session_state:
+    st.session_state.login_page = None
+if "profile_page" not in st.session_state:
+    st.session_state.profile_page = None
+
+
 class HomePage:
     def __init__(self, driver, wait):
         self.driver = driver
@@ -158,17 +172,21 @@ class ProfilePage:
         return len(follow_buttons) - 1
 
 
-def get_driver():
+def get_driver(headless, incognito, ignore):
     options = Options()
     options.add_argument("--no-sandbox")
-    # options.add_argument("--headless")
-    options.add_argument("--window-size=1080x1080")
-    options.add_argument("--disable-dev-shm-usage")
-    options.add_argument("--ignore-certificate-errors")
-    options.add_argument("--incognito")
     options.add_argument("--disable-blink-features=AutomationControlled")
     options.add_argument("--disable-gpu")
-    # chrome_options.add_argument("--disable-extensions")
+    options.add_argument("--window-size=720x720")
+    options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--disable-extensions")
+    if headless:
+        options.add_argument("--headless")
+    if ignore:
+        options.add_argument("--ignore-certificate-errors")
+    if incognito:
+        options.add_argument("--incognito")
+
     driver = webdriver.Chrome(
         service=Service(ChromeDriverManager().install()), options=options
     )
@@ -176,27 +194,13 @@ def get_driver():
     return driver
 
 
-if "login" not in st.session_state:
-    st.session_state.login = False
-if "login_button_clicked" not in st.session_state:
-    st.session_state.login_button_clicked = False
-if "driver" not in st.session_state:
-    st.session_state.driver = None
-if "home_page" not in st.session_state:
-    st.session_state.home_page = None
-if "login_page" not in st.session_state:
-    st.session_state.login_page = None
-if "profile_page" not in st.session_state:
-    st.session_state.profile_page = None
-
-
 def login_button_callback():
     st.session_state.login_button_clicked = True
 
 
-def start_automation():
+def start_automation(headless, incognito, ignore):
     try:
-        driver = get_driver()
+        driver = get_driver(headless, incognito, ignore)
         st.session_state.driver = driver
         wait = WebDriverWait(driver, 10)
         home_page = HomePage(driver, wait)
@@ -237,9 +241,14 @@ def main():
     with st.sidebar:
         st.text_input("Please enter your username:", key="username")
         st.text_input("Please enter your password:", type="password", key="password")
+        # headless, incognito, ignore = [False] * 3
+        with st.expander("Extra Configurations for the Bot"):
+            headless = st.checkbox("Headless")
+            incognito = st.checkbox("Incognito")
+            ignore = st.checkbox("Ignore certificate errors")
         button = st.button("Login Account", on_click=login_button_callback)
         if button:
-            login_status = start_automation()
+            login_status = start_automation(headless, incognito, ignore)
             placeholder = st.sidebar.empty()
             if login_status:
                 with placeholder.container():
