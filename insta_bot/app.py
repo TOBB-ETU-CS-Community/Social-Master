@@ -81,7 +81,7 @@ class ExplorePage:
         self.driver = driver
         self.wait = wait
 
-    def like_tags(self, hashtags, like_count=5):
+    def like_and_comment_tags(self, hashtags, like_count=5):
         comments = ["Great 🤩", "Amazing 😍", "Looks nice 👍", "WoW 🤯", "Unbelieveble 🙀"]
         for hashtag in hashtags:
             try:
@@ -108,7 +108,6 @@ class ExplorePage:
                     self.driver.execute_script("arguments[0].click();", like_button)
                     comment_button = buttons[3]
                     self.driver.execute_script("arguments[0].click();", comment_button)
-                    print("comment clicked")
                     textarea = self.wait.until(
                         EC.element_to_be_clickable(
                             (By.XPATH, "//div[@class='_akhn']//textarea")
@@ -281,7 +280,7 @@ def main():
             _, center_col, _ = st.columns([1, 3, 1])
             operation = center_col.selectbox(
                 "Please select the operation you want",
-                ["<Select>", "Follow", "Like", "Unfollow"],
+                ["<Select>", "Follow", "Like & Comment", "Unfollow"],
             )
             if operation == "Follow":
                 center_col.text_input(
@@ -296,9 +295,9 @@ def main():
                     step=10,
                     key="number_of_follow",
                 )
-            elif operation == "Like":
+            elif operation == "Like & Comment":
                 center_col.text_input(
-                    "Please write the hashtags that you want to like, separated by space:",
+                    "Please write the hashtags that you want to like and comment, separated by space:",
                     key="hashtags",
                 )
             elif operation == "Unfollow":
@@ -326,11 +325,11 @@ def main():
                 )
                 with placeholder.container():
                     st.success(f"{followed_number} followers followed")
-            elif start and operation == "Like":
+            elif start and operation == "Like & Comment":
                 login_page = st.session_state.login_page
                 explore_page = login_page.go_to_explore_page()
                 hashtags = st.session_state.hashtags.split(" ")
-                explore_page.like_tags(hashtags)
+                explore_page.like_and_comment_tags(hashtags)
             elif start and operation == "Unfollow":
                 login_page = st.session_state.login_page
                 profile_page = login_page.go_to_profile_page()
