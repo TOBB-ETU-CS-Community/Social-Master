@@ -82,7 +82,8 @@ class ExplorePage:
         self.wait = wait
 
     def like_and_comment_tags(self, hashtags, like_count=5):
-        comments = ["Great", "Amazing", "Looks nice", "WoW", "Unbelievable"]
+        comments = ["Great 🤩", "Amazing 😍", "Love it ❤️", "Looks nice 👌", "WoW 🤯", "Unbelievable 🙀", "Impressive 👏"
+        "Fantastic 🌟", "Incredible 🚀", "Mind-blowing 🤯", "Brilliant 💡", "Astonishing 🌈", "Exceptional 💪", "Outstanding 🏆"]
         for hashtag in hashtags:
             try:
                 self.driver.get(f"https://www.instagram.com/explore/tags/{hashtag}/")
@@ -94,6 +95,7 @@ class ExplorePage:
                 )
                 for i in range(len(posts)):
                     try:
+                        get_random_delay()
                         post = posts[i]
                         self.driver.execute_script("arguments[0].click();", post)
                         get_random_delay()
@@ -119,9 +121,15 @@ class ExplorePage:
                         self.driver.execute_script("arguments[0].click();", textarea)
                         get_random_delay()
                         print("send_keys")
-                        textarea.send_keys(random.choice(comments))
-                        get_random_delay()
+                        self.driver.execute_script(
+                            "arguments[0].innerHTML = '{}'".format(
+                                random.choice(comments)
+                            ),
+                            textarea,
+                        )
+                        textarea.send_keys(" ")
                         textarea.send_keys(Keys.ENTER)
+                        get_random_delay()
                     except:
                         st.error(f"This post cannot be commented on")
                         continue
