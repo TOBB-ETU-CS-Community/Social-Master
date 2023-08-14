@@ -82,6 +82,7 @@ class ExplorePage:
         self.wait = wait
 
     def like_tags(self, hashtags, like_count=5):
+        comments = ["Great 🤩", "Amazing 😍", "Looks nice 👍", "WoW 🤯", "Unbelieveble 🙀"]
         for hashtag in hashtags:
             try:
                 self.driver.get(f"https://www.instagram.com/explore/tags/{hashtag}/")
@@ -105,7 +106,19 @@ class ExplorePage:
                     )
                     like_button = buttons[2]
                     self.driver.execute_script("arguments[0].click();", like_button)
+                    comment_button = buttons[3]
+                    self.driver.execute_script("arguments[0].click();", comment_button)
+                    print("comment clicked")
+                    textarea = self.wait.until(
+                        EC.element_to_be_clickable(
+                            (By.XPATH, "//div[@class='_akhn']//textarea")
+                        )
+                    )
+                    self.driver.execute_script("arguments[0].click();", textarea)
                     get_random_delay()
+                    textarea.send_keys(random.choice(comments), Keys.ENTER)
+                    get_random_delay()
+
             except:
                 st.error(f"There is no explore page for hashtag: {hashtag}")
 
