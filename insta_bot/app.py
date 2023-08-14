@@ -82,7 +82,7 @@ class ExplorePage:
         self.wait = wait
 
     def like_and_comment_tags(self, hashtags, like_count=5):
-        comments = ["Great 🤩", "Amazing 😍", "Looks nice 👍", "WoW 🤯", "Unbelieveble 🙀"]
+        comments = ["Great", "Amazing", "Looks nice", "WoW", "Unbelievable"]
         for hashtag in hashtags:
             try:
                 self.driver.get(f"https://www.instagram.com/explore/tags/{hashtag}/")
@@ -93,30 +93,38 @@ class ExplorePage:
                     )
                 )
                 for i in range(len(posts)):
-                    post = posts[i]
-                    self.driver.execute_script("arguments[0].click();", post)
-                    get_random_delay()
-                    buttons = self.wait.until(
-                        EC.visibility_of_any_elements_located(
-                            (
-                                By.XPATH,
-                                "//div[@class='x6s0dn4 x78zum5 xdt5ytf xl56j7k']",
+                    try:
+                        post = posts[i]
+                        self.driver.execute_script("arguments[0].click();", post)
+                        get_random_delay()
+                        buttons = self.wait.until(
+                            EC.visibility_of_any_elements_located(
+                                (
+                                    By.XPATH,
+                                    "//div[@class='x6s0dn4 x78zum5 xdt5ytf xl56j7k']",
+                                )
                             )
                         )
-                    )
-                    like_button = buttons[2]
-                    self.driver.execute_script("arguments[0].click();", like_button)
-                    comment_button = buttons[3]
-                    self.driver.execute_script("arguments[0].click();", comment_button)
-                    textarea = self.wait.until(
-                        EC.element_to_be_clickable(
-                            (By.XPATH, "//div[@class='_akhn']//textarea")
+                        like_button = buttons[2]
+                        self.driver.execute_script("arguments[0].click();", like_button)
+                        comment_button = buttons[3]
+                        self.driver.execute_script(
+                            "arguments[0].click();", comment_button
                         )
-                    )
-                    self.driver.execute_script("arguments[0].click();", textarea)
-                    get_random_delay()
-                    textarea.send_keys(random.choice(comments), Keys.ENTER)
-                    get_random_delay()
+                        textarea = self.wait.until(
+                            EC.element_to_be_clickable(
+                                (By.XPATH, "//div[@class='_akhn']//textarea")
+                            )
+                        )
+                        self.driver.execute_script("arguments[0].click();", textarea)
+                        get_random_delay()
+                        print("send_keys")
+                        textarea.send_keys(random.choice(comments))
+                        get_random_delay()
+                        textarea.send_keys(Keys.ENTER)
+                    except:
+                        st.error(f"This post cannot be commented on")
+                        continue
 
             except:
                 st.error(f"There is no explore page for hashtag: {hashtag}")
