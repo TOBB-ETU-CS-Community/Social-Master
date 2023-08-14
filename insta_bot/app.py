@@ -83,28 +83,31 @@ class ExplorePage:
 
     def like_tags(self, hashtags, like_count=5):
         for hashtag in hashtags:
-            self.driver.get(f"https://www.instagram.com/explore/tags/{hashtag}/")
-            get_random_delay()
-            posts = self.wait.until(
-                EC.visibility_of_any_elements_located(
-                    (By.XPATH, "//div[@class='_aagu']")
-                )
-            )
-            for i in range(len(posts)):
-                post = posts[i]
-                self.driver.execute_script("arguments[0].click();", post)
+            try:
+                self.driver.get(f"https://www.instagram.com/explore/tags/{hashtag}/")
                 get_random_delay()
-                buttons = self.wait.until(
+                posts = self.wait.until(
                     EC.visibility_of_any_elements_located(
-                        (
-                            By.XPATH,
-                            "//div[@class='x6s0dn4 x78zum5 xdt5ytf xl56j7k']",
-                        )
+                        (By.XPATH, "//div[@class='_aagu']")
                     )
                 )
-                like_button = buttons[2]
-                self.driver.execute_script("arguments[0].click();", like_button)
-                get_random_delay()
+                for i in range(len(posts)):
+                    post = posts[i]
+                    self.driver.execute_script("arguments[0].click();", post)
+                    get_random_delay()
+                    buttons = self.wait.until(
+                        EC.visibility_of_any_elements_located(
+                            (
+                                By.XPATH,
+                                "//div[@class='x6s0dn4 x78zum5 xdt5ytf xl56j7k']",
+                            )
+                        )
+                    )
+                    like_button = buttons[2]
+                    self.driver.execute_script("arguments[0].click();", like_button)
+                    get_random_delay()
+            except:
+                st.error(f"There is no explore page for hashtag: {hashtag}")
 
 
 class ProfilePage:
@@ -120,12 +123,12 @@ class ProfilePage:
         get_random_delay()
         self.driver.get(f"https://www.instagram.com/{username}/following/")
 
-    def unfollow_following(self, max_count=100):
+    def unfollow_following(self, count=50):
         get_random_delay()
         dialog_window = self.wait.until(
             EC.visibility_of_element_located((By.XPATH, "//div[@class='_aano']"))
         )
-        for _ in range(max_count // 5 + 1):
+        for _ in range(count // 5 + 1):
             self.driver.execute_script(
                 "arguments[0].scrollTop = arguments[0].scrollTop + arguments[0].offsetHeight;",
                 dialog_window,
@@ -142,18 +145,20 @@ class ProfilePage:
             )
             self.driver.execute_script("arguments[0].click();", unfollow_button2)
             get_random_delay()
+            if i == count:
+                break
         close_button = self.wait.until(
             EC.visibility_of_element_located((By.XPATH, "//button[@class='_abl-']"))
         )
         self.driver.execute_script("arguments[0].click();", close_button)
-        return len(unfollow_buttons) - 1
+        return i
 
-    def follow_followers(self, max_count=100):
+    def follow_followers(self, count=50):
         get_random_delay()
         dialog_window = self.wait.until(
             EC.visibility_of_element_located((By.XPATH, "//div[@class='_aano']"))
         )
-        for _ in range(max_count // 5 + 1):
+        for _ in range(count // 5 + 1):
             self.driver.execute_script(
                 "arguments[0].scrollTop = arguments[0].scrollTop + arguments[0].offsetHeight;",
                 dialog_window,
@@ -165,11 +170,13 @@ class ProfilePage:
             follow_button = follow_buttons[i]
             self.driver.execute_script("arguments[0].click();", follow_button)
             get_random_delay()
+            if i == count:
+                break
         close_button = self.wait.until(
             EC.visibility_of_element_located((By.XPATH, "//button[@class='_abl-']"))
         )
         self.driver.execute_script("arguments[0].click();", close_button)
-        return len(follow_buttons) - 1
+        return i
 
 
 def get_driver(headless, incognito, ignore):
@@ -241,7 +248,6 @@ def main():
     with st.sidebar:
         st.text_input("Please enter your username:", key="username")
         st.text_input("Please enter your password:", type="password", key="password")
-        # headless, incognito, ignore = [False] * 3
         with st.expander("Extra Configurations for the Bot"):
             headless = st.checkbox("Headless")
             incognito = st.checkbox("Incognito")
@@ -269,10 +275,27 @@ def main():
                     "Please enter the username whose followers you want to follow:",
                     key="influencer_username",
                 )
+                center_col.number_input(
+                    "Please enter the number of followers you want to follow:",
+                    min_value=10,
+                    max_value=200,
+                    value=50,
+                    step=10,
+                    key="number_of_follow",
+                )
             elif operation == "Like":
                 center_col.text_input(
                     "Please write the hashtags that you want to like, separated by space:",
                     key="hashtags",
+                )
+            elif operation == "Unfollow":
+                center_col.number_input(
+                    "Please enter the number of following you want to unfollow:",
+                    min_value=10,
+                    max_value=200,
+                    value=50,
+                    step=10,
+                    key="number_of_unfollow",
                 )
             _, center_col, _ = st.columns([4, 5, 2])
             start = center_col.button("Start the automation")
@@ -285,7 +308,9 @@ def main():
                 )
                 with placeholder.container():
                     st.success("Followers dialog opened")
-                followed_number = profile_page.follow_followers(max_count=100)
+                followed_number = profile_page.follow_followers(
+                    count=st.session_state.number_of_follow
+                )
                 with placeholder.container():
                     st.success(f"{followed_number} followers followed")
             elif start and operation == "Like":
@@ -299,7 +324,9 @@ def main():
                 profile_page.go_to_following_window(st.session_state.username.lower())
                 with placeholder.container():
                     st.success("Following dialog opened")
-                unfollowed_number = profile_page.unfollow_following(max_count=100)
+                unfollowed_number = profile_page.unfollow_following(
+                    count=st.session_state.number_of_unfollow
+                )
                 with placeholder.container():
                     st.success(f"{unfollowed_number} followings unfollowed")
         except Exception as e:
@@ -308,7 +335,7 @@ def main():
                 st.error(e)
                 st.session_state.driver.get_screenshot_as_file("exception.png")
     else:
-        st.warning("Please login first.")
+        st.warning(body="Please login first.", icon="⚠️")
 
 
 if __name__ == "__main__":
