@@ -82,8 +82,21 @@ class ExplorePage:
         self.wait = wait
 
     def like_and_comment_tags(self, hashtags, like_count=5):
-        comments = ["Great 🤩", "Amazing 😍", "Love it ❤️", "Looks nice 👌", "WoW 🤯", "Unbelievable 🙀", "Impressive 👏"
-        "Fantastic 🌟", "Incredible 🚀", "Mind-blowing 🤯", "Brilliant 💡", "Astonishing 🌈", "Exceptional 💪", "Outstanding 🏆"]
+        comments = [
+            "Great 🤩",
+            "Amazing 😍",
+            "Love it ❤️",
+            "Looks nice 👌",
+            "WoW 🤯",
+            "Unbelievable 🙀",
+            "Impressive 👏" "Fantastic 🌟",
+            "Incredible 🚀",
+            "Mind-blowing 🤯",
+            "Brilliant 💡",
+            "Astonishing 🌈",
+            "Exceptional 💪",
+            "Outstanding 🏆",
+        ]
         for hashtag in hashtags:
             try:
                 self.driver.get(f"https://www.instagram.com/explore/tags/{hashtag}/")
@@ -223,7 +236,8 @@ def get_driver(headless, incognito, ignore):
         options.add_argument("--incognito")
 
     driver = webdriver.Chrome(
-        service=Service(ChromeDriverManager().install()), options=options
+        # "chromedriver.exe",
+        # service=Service(ChromeDriverManager().install()), options=options
     )
     driver.implicitly_wait(10)
     return driver
