@@ -238,6 +238,7 @@ def get_driver(headless, incognito, ignore):
 
     driver = webdriver.Chrome(
         # "chromedriver.exe",
+        "./chromedriver",
         options=options,
         # service=Service(ChromeDriverManager().install()), options=options
     )
@@ -284,7 +285,7 @@ def main():
         sidebar_background_img_path=sidebar_background_img_path,
     )
     st.markdown(page_markdown, unsafe_allow_html=True)
-
+    st.write(os.getcwd())
     st.markdown(
         """<h1 style='text-align: center; color: black; font-size: 60px;'> 🤖 INSTA BOT </h1>
         <br>""",
