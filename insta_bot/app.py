@@ -236,9 +236,11 @@ def get_driver(headless, incognito, ignore):
     if incognito:
         options.add_argument("--incognito")
 
+    service = Service(executable_path=r"./chromedriver")
+
     driver = webdriver.Chrome(
         # "chromedriver.exe",
-        "./chromedriver",
+        service=service,
         options=options,
         # service=Service(ChromeDriverManager().install()), options=options
     )
