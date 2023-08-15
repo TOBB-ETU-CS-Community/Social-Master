@@ -8,7 +8,8 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 import streamlit as st
-from webdriver_manager.chrome import ChromeDriverManager
+
+# from webdriver_manager.chrome import ChromeDriverManager
 from modules.utils import add_bg_from_local, set_page_config
 from selenium.webdriver.support import expected_conditions as EC
 from chromedriver_py import binary_path
@@ -239,7 +240,6 @@ def get_driver(headless, incognito, ignore):
     service = Service(executable_path=binary_path)
 
     driver = webdriver.Chrome(
-        # "chromedriver.exe",
         service=service,
         options=options,
         # service=Service(ChromeDriverManager().install()), options=options
@@ -287,7 +287,7 @@ def main():
         sidebar_background_img_path=sidebar_background_img_path,
     )
     st.markdown(page_markdown, unsafe_allow_html=True)
-    st.write(os.getcwd())
+
     st.markdown(
         """<h1 style='text-align: center; color: black; font-size: 60px;'> 🤖 INSTA BOT </h1>
         <br>""",
