@@ -11,6 +11,7 @@ import streamlit as st
 from webdriver_manager.chrome import ChromeDriverManager
 from modules.utils import add_bg_from_local, set_page_config
 from selenium.webdriver.support import expected_conditions as EC
+import chromedriver_binary
 
 
 if "login" not in st.session_state:
@@ -237,6 +238,7 @@ def get_driver(headless, incognito, ignore):
 
     driver = webdriver.Chrome(
         # "chromedriver.exe",
+        options=options,
         # service=Service(ChromeDriverManager().install()), options=options
     )
     driver.implicitly_wait(10)
@@ -248,6 +250,7 @@ def login_button_callback():
 
 
 def start_automation(headless, incognito, ignore):
+    error = None
     try:
         driver = get_driver(headless, incognito, ignore)
         st.session_state.driver = driver
@@ -260,9 +263,10 @@ def start_automation(headless, incognito, ignore):
         st.session_state.login = True
     except Exception as e:
         print(e)
+        error = e
         st.session_state.login = False
     finally:
-        return st.session_state.login
+        return [st.session_state.login, error]
 
 
 def get_random_delay(delays: list[float] = [1, 1.5, 2, 2.5, 3]):
@@ -296,7 +300,7 @@ def main():
             ignore = st.checkbox("Ignore certificate errors")
         button = st.button("Login Account", on_click=login_button_callback)
         if button:
-            login_status = start_automation(headless, incognito, ignore)
+            login_status, error = start_automation(headless, incognito, ignore)
             placeholder = st.sidebar.empty()
             if login_status:
                 with placeholder.container():
@@ -304,6 +308,7 @@ def main():
             else:
                 with placeholder.container():
                     st.error("An error occured. Please try again to login.")
+                    st.error(error)
     if st.session_state.login:
         try:
             get_random_delay()

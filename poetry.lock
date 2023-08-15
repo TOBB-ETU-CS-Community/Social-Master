@@ -293,6 +293,17 @@ files = [
 ]
 
 [[package]]
+name = "chromedriver-binary"
+version = "118.0.5943.0.0"
+description = "Installer for chromedriver."
+category = "main"
+optional = false
+python-versions = "*"
+files = [
+    {file = "chromedriver-binary-118.0.5943.0.0.tar.gz", hash = "sha256:fea8efe2f694b3713f3e3fff0e08f63c8747360adc3149d2a6669fd90b92a350"},
+]
+
+[[package]]
 name = "click"
 version = "8.1.6"
 description = "Composable command line interface toolkit"
@@ -1887,4 +1898,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "df0150ddaaff812e8b1f7e487ac40ed747e4b57300cef9c390652ba72668877b"
+content-hash = "f2addb2772aee0ed342b21bce5e56cde2d5d94873545d6b35537140b3bd588fd"
