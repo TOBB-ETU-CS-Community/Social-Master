@@ -11,7 +11,7 @@ import streamlit as st
 from webdriver_manager.chrome import ChromeDriverManager
 from modules.utils import add_bg_from_local, set_page_config
 from selenium.webdriver.support import expected_conditions as EC
-import chromedriver_binary
+from chromedriver_py import binary_path
 
 
 if "login" not in st.session_state:
@@ -236,7 +236,7 @@ def get_driver(headless, incognito, ignore):
     if incognito:
         options.add_argument("--incognito")
 
-    service = Service(executable_path=r"./chromedriver")
+    service = Service(executable_path=binary_path)
 
     driver = webdriver.Chrome(
         # "chromedriver.exe",

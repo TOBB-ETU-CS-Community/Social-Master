@@ -11,7 +11,7 @@ streamlit = "^1.25.0"
 selenium = "^4.11.2"
 webdriver-manager = "^4.0.0"
 seleniumbase = "^4.17.1"
-chromedriver-binary = "^118.0.5943.0.0"
+chromedriver-py = "^115.0.5790.170"
 
 
 [build-system]
