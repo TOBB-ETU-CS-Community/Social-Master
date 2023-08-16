@@ -177,9 +177,14 @@ class ProfilePage:
                 dialog_window,
             )
         unfollow_buttons = self.wait.until(
-            EC.visibility_of_any_elements_located((By.XPATH, "//*[text()='Following']"))
+            EC.visibility_of_any_elements_located(
+                (By.XPATH, "//button[@class='_acan _acap _acat _aj1-']")
+            )
         )
+        print("Outside")
+        print(len(unfollow_buttons))
         for i in range(1, len(unfollow_buttons)):
+            print("Inside")
             unfollow_button1 = unfollow_buttons[i]
             self.driver.execute_script("arguments[0].click();", unfollow_button1)
             get_random_delay()
