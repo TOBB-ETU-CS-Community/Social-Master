@@ -186,6 +186,9 @@ class ProfilePage:
             st.image(image)
             get_random_delay()
             st.write("after delay")
+            st.session_state.driver.get_screenshot_as_file("exception.png")
+            image = Image.open("exception.png")
+            st.image(image)
             dialog_window = self.wait.until(
                 EC.visibility_of_element_located((By.XPATH, "//div[@class='_aano']"))
             )
@@ -375,6 +378,9 @@ def main():
             if login_status:
                 with placeholder.container():
                     st.success("Instagram login successful")
+                st.session_state.driver.get_screenshot_as_file("exception.png")
+                image = Image.open("exception.png")
+                st.image(image)
             else:
                 with placeholder.container():
                     st.error("An error occured. Please try again to login.")
