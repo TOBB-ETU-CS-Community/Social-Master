@@ -286,7 +286,17 @@ def start_automation(headless, incognito, ignore):
         return [st.session_state.login, error]
 
 
-def get_random_delay(delays: list[float] = [1, 1.5, 2, 2.5, 3]):
+def get_random_delay(
+    delays: list[float] = [
+        0.5,
+        0.75,
+        1,
+        1.25,
+        1.5,
+        1.75,
+        2,
+    ]
+):
     delay = random.choice(delays)
     time.sleep(delay)
 
