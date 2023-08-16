@@ -372,9 +372,11 @@ def main():
                 )
                 with placeholder.container():
                     st.success("Followers dialog opened")
-                followed_number = profile_page.follow_followers(
-                    count=st.session_state.number_of_follow
-                )
+                followed_number = 0
+                while followed_number < st.session_state.number_of_follow:
+                    followed_number += profile_page.follow_followers(
+                        count=st.session_state.number_of_follow
+                    )
                 with placeholder.container():
                     st.success(f"{followed_number} followers followed")
             elif start and operation == "Like & Comment":
@@ -388,9 +390,11 @@ def main():
                 profile_page.go_to_following_window(st.session_state.username.lower())
                 with placeholder.container():
                     st.success("Following dialog opened")
-                unfollowed_number = profile_page.unfollow_following(
-                    count=st.session_state.number_of_unfollow
-                )
+                unfollowed_number = 0
+                while unfollowed_number < st.number_of_unfollow.number_of_follow:
+                    unfollowed_number += profile_page.unfollow_following(
+                        count=st.session_state.number_of_unfollow
+                    )
                 with placeholder.container():
                     st.success(f"{unfollowed_number} followings unfollowed")
         except Exception as e:
