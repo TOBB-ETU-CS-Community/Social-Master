@@ -8,6 +8,7 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 import streamlit as st
+from PIL import Image
 
 # from webdriver_manager.chrome import ChromeDriverManager
 from modules.utils import add_bg_from_local, set_page_config
@@ -180,6 +181,9 @@ class ProfilePage:
     def unfollow_following(self, count=50):
         try:
             st.write("method")
+            st.session_state.driver.get_screenshot_as_file("exception.png")
+            image = Image.open("exception.png")
+            st.image(image)
             get_random_delay()
             st.write("after delay")
             dialog_window = self.wait.until(
