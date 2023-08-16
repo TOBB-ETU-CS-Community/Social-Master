@@ -108,6 +108,7 @@ class ExplorePage:
                         (By.XPATH, "//div[@class='_aagu']")
                     )
                 )
+                placeholder = st.empty()
                 for i in range(len(posts)):
                     try:
                         get_random_delay()
@@ -124,10 +125,13 @@ class ExplorePage:
                         )
                         like_button = buttons[2]
                         self.driver.execute_script("arguments[0].click();", like_button)
+                        with placeholder.container():
+                            st.success(f"{i+1} posts liked for {hashtag} hashtag")
                         comment_button = buttons[3]
                         self.driver.execute_script(
                             "arguments[0].click();", comment_button
                         )
+
                         textarea = self.wait.until(
                             EC.element_to_be_clickable(
                                 (By.XPATH, "//div[@class='_akhn']//textarea")
@@ -181,6 +185,7 @@ class ProfilePage:
                 (By.XPATH, "//button[@class='_acan _acap _acat _aj1-']")
             )
         )
+        placeholder = st.empty()
         for i in range(len(unfollow_buttons)):
             try:
                 unfollow_button1 = unfollow_buttons[i]
@@ -192,6 +197,8 @@ class ProfilePage:
                     )
                 )
                 self.driver.execute_script("arguments[0].click();", unfollow_button2)
+                with placeholder.container():
+                    st.success(f"{i+1} profile unfollowed")
                 get_random_delay()
                 if i == count:
                     break
@@ -219,10 +226,13 @@ class ProfilePage:
                 (By.XPATH, "//button[@class='_acan _acap _acas _aj1-']")
             )
         )
+        placeholder = st.empty()
         for i in range(1, len(follow_buttons)):
             try:
                 follow_button = follow_buttons[i]
                 self.driver.execute_script("arguments[0].click();", follow_button)
+                with placeholder.container():
+                    st.success(f"{i} profile followed")
                 get_random_delay()
                 if i == count:
                     break
@@ -328,6 +338,7 @@ def main():
         button = st.button("Login Account", on_click=login_button_callback)
         if button:
             login_status, error = start_automation(headless, incognito, ignore)
+            get_random_delay()
             placeholder = st.sidebar.empty()
             if login_status:
                 with placeholder.container():
@@ -401,7 +412,7 @@ def main():
                 with placeholder.container():
                     st.success("Following dialog opened")
                 unfollowed_number = 0
-                while unfollowed_number < st.number_of_unfollow.number_of_follow:
+                while unfollowed_number < st.session_state.number_of_unfollow:
                     unfollowed_number += profile_page.unfollow_following(
                         count=st.session_state.number_of_unfollow
                     )
