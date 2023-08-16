@@ -179,7 +179,9 @@ class ProfilePage:
 
     def unfollow_following(self, count=50):
         try:
+            st.write("method")
             get_random_delay()
+            st.write("after delay")
             dialog_window = self.wait.until(
                 EC.visibility_of_element_located((By.XPATH, "//div[@class='_aano']"))
             )
@@ -307,7 +309,7 @@ def start_automation(headful, incognito, ignore):
     try:
         driver = get_driver(headful, incognito, ignore)
         st.session_state.driver = driver
-        wait = WebDriverWait(driver, 10)
+        wait = WebDriverWait(driver, 20)
         home_page = HomePage(driver, wait)
         st.session_state.home_page = home_page
         login_page = home_page.go_to_login_page()
