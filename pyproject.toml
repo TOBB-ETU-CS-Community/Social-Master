@@ -14,6 +14,9 @@ seleniumbase = "^4.17.1"
 chromedriver-py = "^115.0.5790.170"
 
 
+[tool.poetry.group.dev.dependencies]
+pre-commit = "^3.3.3"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
