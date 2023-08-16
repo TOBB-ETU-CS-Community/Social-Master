@@ -171,7 +171,7 @@ class ProfilePage:
         dialog_window = self.wait.until(
             EC.visibility_of_element_located((By.XPATH, "//div[@class='_aano']"))
         )
-        for _ in range(count // 5 + 1):
+        for _ in range(count // 4 + 1):
             self.driver.execute_script(
                 "arguments[0].scrollTop = arguments[0].scrollTop + arguments[0].offsetHeight;",
                 dialog_window,
@@ -183,7 +183,7 @@ class ProfilePage:
         )
         print("Outside")
         print(len(unfollow_buttons))
-        for i in range(1, len(unfollow_buttons)):
+        for i in range(len(unfollow_buttons)):
             print("Inside")
             unfollow_button1 = unfollow_buttons[i]
             self.driver.execute_script("arguments[0].click();", unfollow_button1)
@@ -212,8 +212,11 @@ class ProfilePage:
                 dialog_window,
             )
         follow_buttons = self.wait.until(
-            EC.visibility_of_any_elements_located((By.XPATH, "//*[text()='Follow']"))
+            EC.visibility_of_any_elements_located(
+                (By.XPATH, "//button[@class='_acan _acap _acas _aj1-']")
+            )
         )
+        print(len(follow_buttons))
         for i in range(1, len(follow_buttons)):
             follow_button = follow_buttons[i]
             self.driver.execute_script("arguments[0].click();", follow_button)
