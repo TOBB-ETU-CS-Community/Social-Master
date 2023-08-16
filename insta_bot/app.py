@@ -179,69 +179,48 @@ class ProfilePage:
         self.driver.get(f"https://www.instagram.com/{username}/following/")
 
     def unfollow_following(self, count=50):
-        try:
-            st.write("method")
-            st.session_state.driver.get_screenshot_as_file("exception.png")
-            image = Image.open("exception.png")
-            st.image(image)
-            get_random_delay()
-            st.write("after delay")
-            st.session_state.driver.get_screenshot_as_file("exception.png")
-            image = Image.open("exception.png")
-            st.image(image)
-            dialog_window = self.wait.until(
-                EC.visibility_of_element_located((By.XPATH, "//div[@class='_aano']"))
+        get_random_delay()
+        dialog_window = self.wait.until(
+            EC.visibility_of_element_located((By.XPATH, "//div[@class='_aano']"))
+        )
+        for _ in range(count // 4 + 1):
+            self.driver.execute_script(
+                "arguments[0].scrollTop = arguments[0].scrollTop + arguments[0].offsetHeight;",
+                dialog_window,
             )
-            st.write("dialog clicked")
-            for _ in range(count // 4 + 1):
-                self.driver.execute_script(
-                    "arguments[0].scrollTop = arguments[0].scrollTop + arguments[0].offsetHeight;",
-                    dialog_window,
+        get_random_delay()
+        unfollow_buttons = self.wait.until(
+            EC.visibility_of_any_elements_located(
+                (By.XPATH, "//button[@class='_acan _acap _acat _aj1-']")
+            )
+        )
+        placeholder = st.empty()
+        for i in range(len(unfollow_buttons)):
+            try:
+                unfollow_button1 = unfollow_buttons[i]
+                self.driver.execute_script("arguments[0].click();", unfollow_button1)
+                get_random_delay()
+                unfollow_button2 = self.wait.until(
+                    EC.visibility_of_element_located(
+                        (By.XPATH, "//*[text()='Unfollow']")
+                    )
                 )
-            st.write("dialog scrolled")
-            get_random_delay()
-            unfollow_buttons = self.wait.until(
-                EC.visibility_of_any_elements_located(
-                    (By.XPATH, "//button[@class='_acan _acap _acat _aj1-']")
-                )
-            )
-            st.write("buttons selected")
-            placeholder = st.empty()
-            for i in range(len(unfollow_buttons)):
-                try:
-                    unfollow_button1 = unfollow_buttons[i]
-                    self.driver.execute_script(
-                        "arguments[0].click();", unfollow_button1
-                    )
-                    st.write("unfollow 1")
-                    get_random_delay()
-                    unfollow_button2 = self.wait.until(
-                        EC.visibility_of_element_located(
-                            (By.XPATH, "//*[text()='Unfollow']")
-                        )
-                    )
-                    self.driver.execute_script(
-                        "arguments[0].click();", unfollow_button2
-                    )
-                    st.write("unfollow 2")
-                    with placeholder.container():
-                        st.success(f"{i+1} profile unfollowed")
-                    get_random_delay()
-                    if i == count:
-                        break
-                except Exception as e:
-                    print(e)
-                    continue
-            with placeholder.container():
-                st.success(f"{i+1} profile unfollowed in total")
-            close_button = self.wait.until(
-                EC.visibility_of_element_located((By.XPATH, "//button[@class='_abl-']"))
-            )
-            self.driver.execute_script("arguments[0].click();", close_button)
-            return i + 1
-        except Exception as e:
-            st.write(e)
-            st.session_state.driver.get_screenshot_as_file("exception.png")
+                self.driver.execute_script("arguments[0].click();", unfollow_button2)
+                with placeholder.container():
+                    st.success(f"{i+1} profile unfollowed")
+                get_random_delay()
+                if i == count:
+                    break
+            except Exception as e:
+                print(e)
+                continue
+        with placeholder.container():
+            st.success(f"{i+1} profile unfollowed in total")
+        close_button = self.wait.until(
+            EC.visibility_of_element_located((By.XPATH, "//button[@class='_abl-']"))
+        )
+        self.driver.execute_script("arguments[0].click();", close_button)
+        return i + 1
 
     def follow_followers(self, count=50):
         get_random_delay()
@@ -378,9 +357,6 @@ def main():
             if login_status:
                 with placeholder.container():
                     st.success("Instagram login successful")
-                st.session_state.driver.get_screenshot_as_file("exception.png")
-                image = Image.open("exception.png")
-                st.image(image)
             else:
                 with placeholder.container():
                     st.error("An error occured. Please try again to login.")
