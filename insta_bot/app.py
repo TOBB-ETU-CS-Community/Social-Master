@@ -152,7 +152,8 @@ class ExplorePage:
                     except:
                         st.error(f"This post cannot be commented on")
                         continue
-
+                with placeholder.container():
+                    st.success(f"{i+1} posts liked for {hashtag} hashtag in total")
             except:
                 st.error(f"There is no explore page for hashtag: {hashtag}")
 
@@ -180,6 +181,7 @@ class ProfilePage:
                 "arguments[0].scrollTop = arguments[0].scrollTop + arguments[0].offsetHeight;",
                 dialog_window,
             )
+        get_random_delay()
         unfollow_buttons = self.wait.until(
             EC.visibility_of_any_elements_located(
                 (By.XPATH, "//button[@class='_acan _acap _acat _aj1-']")
@@ -205,7 +207,8 @@ class ProfilePage:
             except Exception as e:
                 print(e)
                 continue
-        placeholder = None
+        with placeholder.container():
+            st.success(f"{i+1} profile unfollowed in total")
         close_button = self.wait.until(
             EC.visibility_of_element_located((By.XPATH, "//button[@class='_abl-']"))
         )
@@ -222,6 +225,7 @@ class ProfilePage:
                 "arguments[0].scrollTop = arguments[0].scrollTop + arguments[0].offsetHeight;",
                 dialog_window,
             )
+        get_random_delay()
         follow_buttons = self.wait.until(
             EC.visibility_of_any_elements_located(
                 (By.XPATH, "//button[@class='_acan _acap _acas _aj1-']")
@@ -240,6 +244,8 @@ class ProfilePage:
             except Exception as e:
                 print(e)
                 continue
+        with placeholder.container():
+            st.success(f"{i} profile followed in total")
         close_button = self.wait.until(
             EC.visibility_of_element_located((By.XPATH, "//button[@class='_abl-']"))
         )
