@@ -205,11 +205,12 @@ class ProfilePage:
             except Exception as e:
                 print(e)
                 continue
+        placeholder = None
         close_button = self.wait.until(
             EC.visibility_of_element_located((By.XPATH, "//button[@class='_abl-']"))
         )
         self.driver.execute_script("arguments[0].click();", close_button)
-        return i
+        return i + 1
 
     def follow_followers(self, count=50):
         get_random_delay()
@@ -399,7 +400,7 @@ def main():
                         count=st.session_state.number_of_follow
                     )
                 with placeholder.container():
-                    st.success(f"{followed_number} followers followed")
+                    st.success("Following operation completed")
             elif start and operation == "Like & Comment":
                 login_page = st.session_state.login_page
                 explore_page = login_page.go_to_explore_page()
@@ -417,7 +418,7 @@ def main():
                         count=st.session_state.number_of_unfollow
                     )
                 with placeholder.container():
-                    st.success(f"{unfollowed_number} followings unfollowed")
+                    st.success("Unfollowing operation completed")
         except Exception as e:
             with placeholder.container():
                 st.error("An exception occured. Please try again.")
