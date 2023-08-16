@@ -1,20 +1,17 @@
 import os
-import time
 import random
+import time
+
+import streamlit as st
+from chromedriver_py import binary_path
+from modules.utils import add_bg_from_local, set_page_config
 from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-import streamlit as st
-from PIL import Image
-
-# from webdriver_manager.chrome import ChromeDriverManager
-from modules.utils import add_bg_from_local, set_page_config
+from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
-from chromedriver_py import binary_path
-
+from selenium.webdriver.support.ui import WebDriverWait
 
 if "login" not in st.session_state:
     st.session_state.login = False
@@ -38,12 +35,14 @@ class HomePage:
     def go_to_login_page(self):
         try:
             self.driver.get("https://www.instagram.com/")
-            goto_login_button = wait.until(
+            goto_login_button = self.wait.until(
                 EC.element_to_be_clickable((By.XPATH, "//a[text()='Log in']"))
             )
-            self.driver.execute_script("arguments[0].click();", goto_login_button)
-        except:
-            pass
+            self.driver.execute_script(
+                "arguments[0].click();", goto_login_button
+            )
+        except Exception as e:
+            print(e)
         return LoginPage(self.driver, self.wait)
 
 
@@ -68,7 +67,9 @@ class LoginPage:
         username_input.send_keys(username)
         password_input.send_keys(password)
         login_button = self.wait.until(
-            EC.visibility_of_element_located((By.XPATH, "//button[@type='submit']"))
+            EC.visibility_of_element_located(
+                (By.XPATH, "//button[@type='submit']")
+            )
         )
         self.driver.execute_script("arguments[0].click();", login_button)
 
@@ -102,7 +103,9 @@ class ExplorePage:
         ]
         for hashtag in hashtags:
             try:
-                self.driver.get(f"https://www.instagram.com/explore/tags/{hashtag}/")
+                self.driver.get(
+                    f"https://www.instagram.com/explore/tags/{hashtag}/"
+                )
                 get_random_delay()
                 posts = self.wait.until(
                     EC.visibility_of_any_elements_located(
@@ -114,7 +117,9 @@ class ExplorePage:
                     try:
                         get_random_delay()
                         post = posts[i]
-                        self.driver.execute_script("arguments[0].click();", post)
+                        self.driver.execute_script(
+                            "arguments[0].click();", post
+                        )
                         get_random_delay()
                         buttons = self.wait.until(
                             EC.visibility_of_any_elements_located(
@@ -125,9 +130,13 @@ class ExplorePage:
                             )
                         )
                         like_button = buttons[2]
-                        self.driver.execute_script("arguments[0].click();", like_button)
+                        self.driver.execute_script(
+                            "arguments[0].click();", like_button
+                        )
                         with placeholder.container():
-                            st.success(f"{i+1} posts liked for {hashtag} hashtag")
+                            st.success(
+                                f"{i+1} posts liked for {hashtag} hashtag"
+                            )
                         print("like finished")
                         comment_button = buttons[3]
                         self.driver.execute_script(
@@ -140,7 +149,9 @@ class ExplorePage:
                                 (By.XPATH, "//div[@class='_akhn']//textarea")
                             )
                         )
-                        self.driver.execute_script("arguments[0].click();", textarea)
+                        self.driver.execute_script(
+                            "arguments[0].click();", textarea
+                        )
                         print("comment textarea clicked")
                         get_random_delay()
                         print("render emojis")
@@ -155,14 +166,18 @@ class ExplorePage:
                         textarea.send_keys(Keys.ENTER)
                         print("comment finished")
                         get_random_delay()
-                    except:
+                    except Exception as e:
                         with placeholder.container():
-                            st.error(f"This post cannot be commented on")
+                            st.error(f"{i+1}. post cannot be commented on")
+                            st.error(e)
                         continue
                 with placeholder.container():
-                    st.success(f"{i+1} posts liked for {hashtag} hashtag in total")
-            except:
+                    st.success(
+                        f"{i+1} posts liked for {hashtag} hashtag in total"
+                    )
+            except Exception as e:
                 st.error(f"There is no explore page for hashtag: {hashtag}")
+                st.error(e)
 
 
 class ProfilePage:
@@ -181,7 +196,9 @@ class ProfilePage:
     def unfollow_following(self, count=50):
         get_random_delay()
         dialog_window = self.wait.until(
-            EC.visibility_of_element_located((By.XPATH, "//div[@class='_aano']"))
+            EC.visibility_of_element_located(
+                (By.XPATH, "//div[@class='_aano']")
+            )
         )
         for _ in range(count // 4 + 1):
             self.driver.execute_script(
@@ -198,14 +215,18 @@ class ProfilePage:
         for i in range(len(unfollow_buttons)):
             try:
                 unfollow_button1 = unfollow_buttons[i]
-                self.driver.execute_script("arguments[0].click();", unfollow_button1)
+                self.driver.execute_script(
+                    "arguments[0].click();", unfollow_button1
+                )
                 get_random_delay()
                 unfollow_button2 = self.wait.until(
                     EC.visibility_of_element_located(
                         (By.XPATH, "//*[text()='Unfollow']")
                     )
                 )
-                self.driver.execute_script("arguments[0].click();", unfollow_button2)
+                self.driver.execute_script(
+                    "arguments[0].click();", unfollow_button2
+                )
                 with placeholder.container():
                     st.success(f"{i+1} profile unfollowed")
                 get_random_delay()
@@ -217,7 +238,9 @@ class ProfilePage:
         with placeholder.container():
             st.success(f"{i+1} profile unfollowed in total")
         close_button = self.wait.until(
-            EC.visibility_of_element_located((By.XPATH, "//button[@class='_abl-']"))
+            EC.visibility_of_element_located(
+                (By.XPATH, "//button[@class='_abl-']")
+            )
         )
         self.driver.execute_script("arguments[0].click();", close_button)
         return i + 1
@@ -225,7 +248,9 @@ class ProfilePage:
     def follow_followers(self, count=50):
         get_random_delay()
         dialog_window = self.wait.until(
-            EC.visibility_of_element_located((By.XPATH, "//div[@class='_aano']"))
+            EC.visibility_of_element_located(
+                (By.XPATH, "//div[@class='_aano']")
+            )
         )
         for _ in range(count // 5 + 1):
             self.driver.execute_script(
@@ -242,7 +267,9 @@ class ProfilePage:
         for i in range(1, len(follow_buttons)):
             try:
                 follow_button = follow_buttons[i]
-                self.driver.execute_script("arguments[0].click();", follow_button)
+                self.driver.execute_script(
+                    "arguments[0].click();", follow_button
+                )
                 with placeholder.container():
                     st.success(f"{i} profile followed")
                 get_random_delay()
@@ -254,7 +281,9 @@ class ProfilePage:
         with placeholder.container():
             st.success(f"{i} profile followed in total")
         close_button = self.wait.until(
-            EC.visibility_of_element_located((By.XPATH, "//button[@class='_abl-']"))
+            EC.visibility_of_element_located(
+                (By.XPATH, "//button[@class='_abl-']")
+            )
         )
         self.driver.execute_script("arguments[0].click();", close_button)
         return i
@@ -300,7 +329,9 @@ def start_automation(headful, incognito, ignore):
         st.session_state.home_page = home_page
         login_page = home_page.go_to_login_page()
         st.session_state.login_page = login_page
-        login_page.login(st.session_state.username.lower(), st.session_state.password)
+        login_page.login(
+            st.session_state.username.lower(), st.session_state.password
+        )
         st.session_state.login = True
     except Exception as e:
         print(e)
@@ -329,7 +360,9 @@ def main():
     set_page_config()
 
     background_img_path = os.path.join("static", "background", "main-bg.png")
-    sidebar_background_img_path = os.path.join("static", "background", "side-bg.png")
+    sidebar_background_img_path = os.path.join(
+        "static", "background", "side-bg.png"
+    )
     page_markdown = add_bg_from_local(
         background_img_path=background_img_path,
         sidebar_background_img_path=sidebar_background_img_path,
@@ -344,7 +377,9 @@ def main():
 
     with st.sidebar:
         st.text_input("Please enter your username:", key="username")
-        st.text_input("Please enter your password:", type="password", key="password")
+        st.text_input(
+            "Please enter your password:", type="password", key="password"
+        )
         with st.expander("Extra Configurations for the Bot"):
             headful = st.checkbox("Headful")
             incognito = st.checkbox("Incognito")
@@ -422,7 +457,9 @@ def main():
             elif start and operation == "Unfollow":
                 login_page = st.session_state.login_page
                 profile_page = login_page.go_to_profile_page()
-                profile_page.go_to_following_window(st.session_state.username.lower())
+                profile_page.go_to_following_window(
+                    st.session_state.username.lower()
+                )
                 with placeholder.container():
                     st.success("Following dialog opened")
                 unfollowed_number = 0
