@@ -181,20 +181,23 @@ class ProfilePage:
                 (By.XPATH, "//button[@class='_acan _acap _acat _aj1-']")
             )
         )
-        print("Outside")
-        print(len(unfollow_buttons))
         for i in range(len(unfollow_buttons)):
-            print("Inside")
-            unfollow_button1 = unfollow_buttons[i]
-            self.driver.execute_script("arguments[0].click();", unfollow_button1)
-            get_random_delay()
-            unfollow_button2 = self.wait.until(
-                EC.visibility_of_element_located((By.XPATH, "//*[text()='Unfollow']"))
-            )
-            self.driver.execute_script("arguments[0].click();", unfollow_button2)
-            get_random_delay()
-            if i == count:
-                break
+            try:
+                unfollow_button1 = unfollow_buttons[i]
+                self.driver.execute_script("arguments[0].click();", unfollow_button1)
+                get_random_delay()
+                unfollow_button2 = self.wait.until(
+                    EC.visibility_of_element_located(
+                        (By.XPATH, "//*[text()='Unfollow']")
+                    )
+                )
+                self.driver.execute_script("arguments[0].click();", unfollow_button2)
+                get_random_delay()
+                if i == count:
+                    break
+            except Exception as e:
+                print(e)
+                continue
         close_button = self.wait.until(
             EC.visibility_of_element_located((By.XPATH, "//button[@class='_abl-']"))
         )
@@ -216,13 +219,16 @@ class ProfilePage:
                 (By.XPATH, "//button[@class='_acan _acap _acas _aj1-']")
             )
         )
-        print(len(follow_buttons))
         for i in range(1, len(follow_buttons)):
-            follow_button = follow_buttons[i]
-            self.driver.execute_script("arguments[0].click();", follow_button)
-            get_random_delay()
-            if i == count:
-                break
+            try:
+                follow_button = follow_buttons[i]
+                self.driver.execute_script("arguments[0].click();", follow_button)
+                get_random_delay()
+                if i == count:
+                    break
+            except Exception as e:
+                print(e)
+                continue
         close_button = self.wait.until(
             EC.visibility_of_element_located((By.XPATH, "//button[@class='_abl-']"))
         )
