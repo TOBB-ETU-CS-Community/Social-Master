@@ -127,30 +127,36 @@ class ExplorePage:
                         self.driver.execute_script("arguments[0].click();", like_button)
                         with placeholder.container():
                             st.success(f"{i+1} posts liked for {hashtag} hashtag")
+                        print("like finished")
                         comment_button = buttons[3]
                         self.driver.execute_script(
                             "arguments[0].click();", comment_button
                         )
-
+                        print("comment button clicked")
+                        get_random_delay()
                         textarea = self.wait.until(
                             EC.element_to_be_clickable(
                                 (By.XPATH, "//div[@class='_akhn']//textarea")
                             )
                         )
                         self.driver.execute_script("arguments[0].click();", textarea)
+                        print("comment textarea clicked")
                         get_random_delay()
-                        print("send_keys")
+                        print("render emojis")
                         self.driver.execute_script(
                             "arguments[0].innerHTML = '{}'".format(
                                 random.choice(comments)
                             ),
                             textarea,
                         )
+                        print("send keys")
                         textarea.send_keys(" ")
                         textarea.send_keys(Keys.ENTER)
+                        print("comment finished")
                         get_random_delay()
                     except:
-                        st.error(f"This post cannot be commented on")
+                        with placeholder.container():
+                            st.error(f"This post cannot be commented on")
                         continue
                 with placeholder.container():
                     st.success(f"{i+1} posts liked for {hashtag} hashtag in total")
