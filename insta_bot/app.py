@@ -253,7 +253,7 @@ class ProfilePage:
         return i
 
 
-def get_driver(headless, incognito, ignore):
+def get_driver(headful, incognito, ignore):
     options = Options()
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-blink-features=AutomationControlled")
@@ -261,7 +261,7 @@ def get_driver(headless, incognito, ignore):
     options.add_argument("--window-size=720x720")
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--disable-extensions")
-    if headless:
+    if not headful:
         options.add_argument("--headless")
     if ignore:
         options.add_argument("--ignore-certificate-errors")
@@ -283,10 +283,10 @@ def login_button_callback():
     st.session_state.login_button_clicked = True
 
 
-def start_automation(headless, incognito, ignore):
+def start_automation(headful, incognito, ignore):
     error = None
     try:
-        driver = get_driver(headless, incognito, ignore)
+        driver = get_driver(headful, incognito, ignore)
         st.session_state.driver = driver
         wait = WebDriverWait(driver, 10)
         home_page = HomePage(driver, wait)
@@ -339,12 +339,12 @@ def main():
         st.text_input("Please enter your username:", key="username")
         st.text_input("Please enter your password:", type="password", key="password")
         with st.expander("Extra Configurations for the Bot"):
-            headless = st.checkbox("Headless")
+            headful = st.checkbox("Headful")
             incognito = st.checkbox("Incognito")
             ignore = st.checkbox("Ignore certificate errors")
         button = st.button("Login Account", on_click=login_button_callback)
         if button:
-            login_status, error = start_automation(headless, incognito, ignore)
+            login_status, error = start_automation(headful, incognito, ignore)
             get_random_delay()
             placeholder = st.sidebar.empty()
             if login_status:
