@@ -5,6 +5,7 @@ import time
 import streamlit as st
 from chromedriver_py import binary_path
 from modules.utils import add_bg_from_local, set_page_config
+from PIL import Image
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
@@ -137,12 +138,12 @@ class ExplorePage:
                             st.success(
                                 f"{i+1} posts liked for {hashtag} hashtag"
                             )
-                        print("like finished")
+                        st.write("like finished")
                         comment_button = buttons[3]
                         self.driver.execute_script(
                             "arguments[0].click();", comment_button
                         )
-                        print("comment button clicked")
+                        st.write("comment button clicked")
                         get_random_delay()
                         textarea = self.wait.until(
                             EC.element_to_be_clickable(
@@ -152,23 +153,28 @@ class ExplorePage:
                         self.driver.execute_script(
                             "arguments[0].click();", textarea
                         )
-                        print("comment textarea clicked")
+                        st.write("comment textarea clicked")
                         get_random_delay()
-                        print("render emojis")
+                        st.write("render emojis")
                         self.driver.execute_script(
                             "arguments[0].innerHTML = '{}'".format(
                                 random.choice(comments)
                             ),
                             textarea,
                         )
-                        print("send keys")
+                        st.write("send keys")
                         textarea.send_keys(" ")
                         textarea.send_keys(Keys.ENTER)
-                        print("comment finished")
+                        st.write("comment finished")
                         get_random_delay()
                     except Exception as e:
+                        st.session_state.driver.get_screenshot_as_file(
+                            "exception.png"
+                        )
+                        image = Image.open("exception.png")
+                        st.image(image)
                         with placeholder.container():
-                            st.error(f"{i+1}. post cannot be commented on")
+                            st.error(f"{i+1}.post cannot be commented on")
                             st.error(e)
                         continue
                 with placeholder.container():
@@ -321,10 +327,11 @@ def login_button_callback():
 
 def start_automation(headful, incognito, ignore):
     error = None
+    login = False
     try:
         driver = get_driver(headful, incognito, ignore)
         st.session_state.driver = driver
-        wait = WebDriverWait(driver, 20)
+        wait = WebDriverWait(driver, 5)
         home_page = HomePage(driver, wait)
         st.session_state.home_page = home_page
         login_page = home_page.go_to_login_page()
@@ -332,13 +339,12 @@ def start_automation(headful, incognito, ignore):
         login_page.login(
             st.session_state.username.lower(), st.session_state.password
         )
-        st.session_state.login = True
+        login = True
     except Exception as e:
         print(e)
         error = e
-        st.session_state.login = False
     finally:
-        return [st.session_state.login, error]
+        return [login, error]
 
 
 def get_random_delay(
@@ -386,10 +392,12 @@ def main():
             ignore = st.checkbox("Ignore certificate errors")
         button = st.button("Login Account", on_click=login_button_callback)
         if button:
-            login_status, error = start_automation(headful, incognito, ignore)
+            st.session_state.login, error = start_automation(
+                headful, incognito, ignore
+            )
             get_random_delay()
             placeholder = st.sidebar.empty()
-            if login_status:
+            if st.session_state.login:
                 with placeholder.container():
                     st.success("Instagram login successful")
             else:
