@@ -171,6 +171,10 @@ class ExplorePage:
                                 (By.XPATH, "//div[@class='_akhn']//textarea")
                             )
                         )
+                        self.driver.execute_script(
+                            "arguments[0].click();", textarea
+                        )
+                        get_random_delay()
                         st.write("send space")
                         get_random_delay()
                         textarea.send_keys("a ")
