@@ -162,8 +162,9 @@ class ExplorePage:
                             ),
                             textarea,
                         )
-                        st.write("send keys")
+                        st.write("send space")
                         textarea.send_keys(" ")
+                        st.write("send enter")
                         textarea.send_keys(Keys.ENTER)
                         st.write("comment finished")
                         get_random_delay()
