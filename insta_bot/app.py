@@ -177,7 +177,11 @@ class ExplorePage:
                         get_random_delay()
                         st.write("send space")
                         get_random_delay()
-                        textarea.send_keys("a ")
+                        d = "a"
+                        self.driver.execute_script(
+                            f"arguments[0].send_keys({d});", textarea
+                        )
+                        # textarea.send_keys("a ")
                         st.write("send enter")
                         textarea.send_keys(Keys.ENTER)
                         st.write("comment finished")
@@ -188,6 +192,7 @@ class ExplorePage:
                         )
                         image = Image.open("exception.png")
                         st.image(image)
+                        get_random_delay()
                         with placeholder.container():
                             st.error(f"{i+1}.post cannot be commented on")
                             st.error(e)
