@@ -87,6 +87,7 @@ class ExplorePage:
         self.wait = wait
 
     def like_and_comment_tags(self, hashtags, like_count=5):
+        """
         comments = [
             "Great 🤩",
             "Amazing 😍",
@@ -101,7 +102,7 @@ class ExplorePage:
             "Astonishing 🌈",
             "Exceptional 💪",
             "Outstanding 🏆",
-        ]
+        ]"""
         for hashtag in hashtags:
             try:
                 self.driver.get(
@@ -156,14 +157,23 @@ class ExplorePage:
                         st.write("comment textarea clicked")
                         get_random_delay()
                         st.write("render emojis")
+                        """
                         self.driver.execute_script(
                             "arguments[0].innerHTML = '{}'".format(
                                 random.choice(comments)
                             ),
                             textarea,
                         )
+                        """
+                        st.write("selecting again")
+                        textarea = self.wait.until(
+                            EC.element_to_be_clickable(
+                                (By.XPATH, "//div[@class='_akhn']//textarea")
+                            )
+                        )
                         st.write("send space")
-                        textarea.send_keys(" ")
+                        get_random_delay()
+                        textarea.send_keys("a ")
                         st.write("send enter")
                         textarea.send_keys(Keys.ENTER)
                         st.write("comment finished")
