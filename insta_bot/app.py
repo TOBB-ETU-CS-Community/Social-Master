@@ -74,6 +74,20 @@ class LoginPage:
         )
         self.driver.execute_script("arguments[0].click();", login_button)
 
+    def check_login(self):
+        get_random_delay([5, 10])
+        try:
+            login_button = self.wait.until(
+                EC.visibility_of_element_located(
+                    (By.XPATH, "//button[@type='submit']/div[text()='Log in']")
+                )
+            )
+            self.driver.execute_script("arguments[0].click();", login_button)
+            return False
+        except Exception as e:
+            print(e)
+            return True
+
     def go_to_profile_page(self):
         return ProfilePage(self.driver, self.wait)
 
@@ -139,25 +153,51 @@ class ExplorePage:
                             st.success(
                                 f"{i+1} posts liked for {hashtag} hashtag"
                             )
-                        st.write("like finished")
                         comment_button = buttons[3]
                         self.driver.execute_script(
                             "arguments[0].click();", comment_button
                         )
                         st.write("comment button clicked")
                         get_random_delay()
-                        textarea = self.wait.until(
-                            EC.element_to_be_clickable(
-                                (By.XPATH, "//div[@class='_akhn']//textarea")
+                        comment_box = self.wait.until(
+                            EC.visibility_of_element_located(
+                                (
+                                    By.CSS_SELECTOR,
+                                    "textarea[aria-label='Add a comment…']",
+                                )
                             )
                         )
                         self.driver.execute_script(
-                            "arguments[0].click();", textarea
+                            "arguments[0].click();", comment_box
                         )
-                        st.write("comment textarea clicked")
+                        st.write("first click")
+                        time.sleep(5)
                         get_random_delay()
-                        st.write("render emojis")
+                        comment_box = self.wait.until(
+                            EC.visibility_of_element_located(
+                                (
+                                    By.CSS_SELECTOR,
+                                    "textarea[aria-label='Add a comment…']",
+                                )
+                            )
+                        )
+                        self.driver.execute_script(
+                            "arguments[0].click();", comment_box
+                        )
+                        st.write("second click")
+                        time.sleep(5)
+                        get_random_delay()
+                        comment_box.send_keys("harika")
+                        comment_box.send_keys(Keys.ENTER)
                         """
+                        textarea = self.wait.until(
+                            EC.presence_of_element_located(
+                                (By.XPATH, "//div[@class='_akhn']//textarea")
+                            )
+                        )
+                        """
+                        """
+                        st.write("render emojis")
                         self.driver.execute_script(
                             "arguments[0].innerHTML = '{}'".format(
                                 random.choice(comments)
@@ -165,33 +205,11 @@ class ExplorePage:
                             textarea,
                         )
                         """
-                        st.write("selecting again")
-                        textarea = self.wait.until(
-                            EC.element_to_be_clickable(
-                                (By.XPATH, "//div[@class='_akhn']//textarea")
-                            )
-                        )
-                        self.driver.execute_script(
-                            "arguments[0].click();", textarea
-                        )
-                        get_random_delay()
-                        st.write("send space")
-                        get_random_delay()
-                        d = "a"
-                        self.driver.execute_script(
-                            f"arguments[0].send_keys({d});", textarea
-                        )
-                        # textarea.send_keys("a ")
-                        st.write("send enter")
-                        textarea.send_keys(Keys.ENTER)
-                        st.write("comment finished")
+                        show_screenshot()
                         get_random_delay()
                     except Exception as e:
-                        st.session_state.driver.get_screenshot_as_file(
-                            "exception.png"
-                        )
-                        image = Image.open("exception.png")
-                        st.image(image)
+                        st.error("error")
+                        show_screenshot()
                         get_random_delay()
                         with placeholder.container():
                             st.error(f"{i+1}.post cannot be commented on")
@@ -359,27 +377,24 @@ def start_automation(headful, incognito, ignore):
         login_page.login(
             st.session_state.username.lower(), st.session_state.password
         )
-        login = True
+        login = login_page.check_login()
     except Exception as e:
         print(e)
         error = e
+
     finally:
         return [login, error]
 
 
-def get_random_delay(
-    delays: list[float] = [
-        0.5,
-        0.75,
-        1,
-        1.25,
-        1.5,
-        1.75,
-        2,
-    ]
-):
-    delay = random.choice(delays)
+def get_random_delay(delay_range: list[float] = [1, 5]):
+    delay = random.uniform(*delay_range)
     time.sleep(delay)
+
+
+def show_screenshot(driver: st.session_state.driver or None):
+    driver.get_screenshot_as_file("exception.png")
+    image = Image.open("exception.png")
+    st.image(image)
 
 
 def main():
@@ -423,7 +438,7 @@ def main():
             else:
                 with placeholder.container():
                     st.error("An error occured. Please try again to login.")
-                    st.error(error)
+                    print(error)
     if st.session_state.login:
         try:
             get_random_delay()
@@ -501,7 +516,7 @@ def main():
             with placeholder.container():
                 st.error("An exception occured. Please try again.")
                 st.error(e)
-                st.session_state.driver.get_screenshot_as_file("exception.png")
+                show_screenshot()
     else:
         st.warning(body="Please login first.", icon="⚠️")
 
