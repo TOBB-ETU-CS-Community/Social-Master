@@ -101,7 +101,6 @@ class ExplorePage:
         self.wait = wait
 
     def like_and_comment_tags(self, hashtags, like_count=5):
-        """
         comments = [
             "Great 🤩",
             "Amazing 😍",
@@ -116,7 +115,7 @@ class ExplorePage:
             "Astonishing 🌈",
             "Exceptional 💪",
             "Outstanding 🏆",
-        ]"""
+        ]
         for hashtag in hashtags:
             try:
                 self.driver.get(
@@ -153,67 +152,58 @@ class ExplorePage:
                             st.success(
                                 f"{i+1} posts liked for {hashtag} hashtag"
                             )
-                        comment_button = buttons[3]
-                        self.driver.execute_script(
-                            "arguments[0].click();", comment_button
-                        )
-                        st.write("comment button clicked")
-                        get_random_delay()
-                        comment_box = self.wait.until(
-                            EC.visibility_of_element_located(
-                                (
-                                    By.CSS_SELECTOR,
-                                    "textarea[aria-label='Add a comment…']",
+                        if st.session_state.add_comments:
+                            try:
+                                comment_button = buttons[3]
+                                self.driver.execute_script(
+                                    "arguments[0].click();", comment_button
                                 )
-                            )
-                        )
-                        self.driver.execute_script(
-                            "arguments[0].click();", comment_box
-                        )
-                        st.write("first click")
-                        time.sleep(5)
-                        get_random_delay()
-                        comment_box = self.wait.until(
-                            EC.visibility_of_element_located(
-                                (
-                                    By.CSS_SELECTOR,
-                                    "textarea[aria-label='Add a comment…']",
+                                st.write("comment button clicked")
+                                get_random_delay()
+                                comment_box = self.wait.until(
+                                    EC.visibility_of_element_located(
+                                        (
+                                            By.CSS_SELECTOR,
+                                            "textarea[aria-label='Add a comment…']",
+                                        )
+                                    )
                                 )
-                            )
-                        )
-                        self.driver.execute_script(
-                            "arguments[0].click();", comment_box
-                        )
-                        st.write("second click")
-                        time.sleep(5)
-                        get_random_delay()
-                        comment_box.send_keys("harika")
-                        comment_box.send_keys(Keys.ENTER)
-                        """
-                        textarea = self.wait.until(
-                            EC.presence_of_element_located(
-                                (By.XPATH, "//div[@class='_akhn']//textarea")
-                            )
-                        )
-                        """
-                        """
-                        st.write("render emojis")
-                        self.driver.execute_script(
-                            "arguments[0].innerHTML = '{}'".format(
-                                random.choice(comments)
-                            ),
-                            textarea,
-                        )
-                        """
-                        show_screenshot()
-                        get_random_delay()
+                                self.driver.execute_script(
+                                    "arguments[0].click();", comment_box
+                                )
+                                st.write("first click")
+                                get_random_delay([3, 7])
+                                comment_box = self.wait.until(
+                                    EC.visibility_of_element_located(
+                                        (
+                                            By.CSS_SELECTOR,
+                                            "textarea[aria-label='Add a comment…']",
+                                        )
+                                    )
+                                )
+                                self.driver.execute_script(
+                                    "arguments[0].click();", comment_box
+                                )
+                                st.write("second click")
+                                self.driver.execute_script(
+                                    "arguments[0].innerHTML = '{}'".format(
+                                        random.choice(comments)
+                                    ),
+                                    comment_box,
+                                )
+                                comment_box.send_keys(" ")
+                                comment_box.send_keys(Keys.ENTER)
+                            except Exception as e:
+                                with placeholder.container():
+                                    st.error(
+                                        f"{i+1}.post cannot be commented on"
+                                    )
+                                    st.error(e)
                     except Exception as e:
                         st.error("error")
+                        print(e)
                         show_screenshot()
                         get_random_delay()
-                        with placeholder.container():
-                            st.error(f"{i+1}.post cannot be commented on")
-                            st.error(e)
                         continue
                 with placeholder.container():
                     st.success(
@@ -333,7 +323,7 @@ class ProfilePage:
         return i
 
 
-def get_driver(headful, incognito, ignore):
+def get_driver(headful):
     options = Options()
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-blink-features=AutomationControlled")
@@ -341,12 +331,10 @@ def get_driver(headful, incognito, ignore):
     options.add_argument("--window-size=720x720")
     options.add_argument("--disable-dev-shm-usage")
     options.add_argument("--disable-extensions")
+    options.add_argument("--ignore-certificate-errors")
+    options.add_argument("--incognito")
     if not headful:
         options.add_argument("--headless")
-    if ignore:
-        options.add_argument("--ignore-certificate-errors")
-    if incognito:
-        options.add_argument("--incognito")
 
     service = Service(executable_path=binary_path)
 
@@ -363,11 +351,11 @@ def login_button_callback():
     st.session_state.login_button_clicked = True
 
 
-def start_automation(headful, incognito, ignore):
+def start_automation(headful):
     error = None
     login = False
     try:
-        driver = get_driver(headful, incognito, ignore)
+        driver = get_driver(headful)
         st.session_state.driver = driver
         wait = WebDriverWait(driver, 5)
         home_page = HomePage(driver, wait)
@@ -421,15 +409,14 @@ def main():
         st.text_input(
             "Please enter your password:", type="password", key="password"
         )
-        with st.expander("Extra Configurations for the Bot"):
+        with st.expander("Extra Configurations"):
             headful = st.checkbox("Headful")
-            incognito = st.checkbox("Incognito")
-            ignore = st.checkbox("Ignore certificate errors")
+            st.session_state.add_comments = st.checkbox(
+                "Add comments alongside the likes"
+            )
         button = st.button("Login Account", on_click=login_button_callback)
         if button:
-            st.session_state.login, error = start_automation(
-                headful, incognito, ignore
-            )
+            st.session_state.login, error = start_automation(headful)
             get_random_delay()
             placeholder = st.sidebar.empty()
             if st.session_state.login:
