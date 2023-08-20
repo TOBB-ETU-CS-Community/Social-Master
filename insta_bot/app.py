@@ -341,9 +341,8 @@ def get_driver(headful):
     driver = webdriver.Chrome(
         service=service,
         options=options,
-        # service=Service(ChromeDriverManager().install()), options=options
     )
-    driver.implicitly_wait(10)
+    driver.implicitly_wait(5)
     return driver
 
 
