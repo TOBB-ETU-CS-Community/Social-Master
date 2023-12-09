@@ -27,7 +27,7 @@ def main():
     )
 
     st.markdown(
-        """<h1 style='text-align: center; color: black; font-size: 60px;'> Social Media Manager 📱 </h1>
+        """<h1 style='text-align: center; color: black; font-size: 60px;'> Medium Manager 📰 </h1>
         <br>""",
         unsafe_allow_html=True,
     )

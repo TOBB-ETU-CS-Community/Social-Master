@@ -12,6 +12,7 @@ selenium = "^4.11.2"
 webdriver-manager = "^4.0.0"
 seleniumbase = "^4.17.1"
 chromedriver-py = "^115.0.5790.170"
+st-pages = "^0.4.5"
 
 
 [tool.poetry.group.dev.dependencies]
