@@ -12,9 +12,9 @@
 
 <hr>
 
-# InstaBot
+# Social Master
 
-Welcome to the Instagram Bot, a tool designed to automate various social media management tasks on Instagram. This bot is developed to assist social media managers, influencers, and businesses in efficiently handling their Instagram accounts.
+Welcome to the Social Master, a tool designed to automate various social media management tasks on Instagram and Medium. This bot is developed to assist social media managers, influencers, and businesses in efficiently handling their social media accounts.
 
 [WebApp Link](https://insta-bot.streamlit.app/)
 
@@ -51,13 +51,13 @@ Before setting up the project, ensure that you have the following prerequisites 
 1. Clone the project repository:
 
 ```
-git clone https://github.com/TOBB-ETU-CS-Community/Insta-Bot.git
+git clone https://github.com/TOBB-ETU-CS-Community/Social-Master.git
 ```
 
 2. Navigate to the project directory:
 
 ```
-cd insta_bot
+cd social_master
 ```
 
 3. Install project dependencies using Poetry:
@@ -80,7 +80,7 @@ poetry shell
 2. Run the project:
 
 ```
-streamlit run "insta_bot/app.py"
+streamlit run "social_master/app.py"
 ```
 
 ## Contributing
@@ -109,4 +109,4 @@ GPL v3
 
 ---
 
-Happy automating and managing your Instagram account!
+Happy automating and managing your Social Media accounts!

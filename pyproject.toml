@@ -1,8 +1,8 @@
 [tool.poetry]
-name = "instabot"
-version = "0.1.0"
-description = ""
-authors = ["fotino21 <ataturhan21@gmail.com>"]
+name = "social_master"
+version = "0.1"
+description = "Social Media Bots to Automate Social Media Management Processes"
+authors = ["invictus-21 <ataturhan21@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
