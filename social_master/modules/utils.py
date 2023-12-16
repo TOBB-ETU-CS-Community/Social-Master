@@ -140,3 +140,70 @@ def find_articles_and_clap(medium_page_url: str, last_n_articles=-1) -> None:
 
     time.sleep(1)
     driver.quit()
+
+# --- Main Function for finding, clapping and commenting on articles ---
+def find_articles_clap_and_comment(medium_page_url: str, last_n_articles=-1) -> None:
+    try:
+        driver = setup_chrome_driver()
+    except SessionNotCreatedException as error:
+        print("This program works when all current chrome sessions/pages are closed, you have open chrome sessions, please run the program again after closing them.")
+        return
+    driver.get(medium_page_url) # Go to the medium profile page
+    a = 0
+    while True:
+
+        # --- Clicking Article Part ---
+        print("Article number: ",(a+1))
+        search : list = WebDriverWait(driver=driver, timeout=10).until(
+                    EC.presence_of_all_elements_located((By.CSS_SELECTOR,"article"))
+        ) # Wait and get the list of articles
+        href = WebDriverWait(driver=driver, timeout=10).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR,"a"))
+        ) # Wait until the articles are clickable
+        href = search[a].find_element(by=By.CSS_SELECTOR, value = "a") # Get the next article to be clicked
+        href.click() # click the article
+        
+        # --- Clapping Part ---
+        clap_button = WebDriverWait(driver=driver, timeout=10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "button[data-testid='headerClapButton']"))) # Wait for the page to load and get clapping button
+        for _ in range(50):
+            clap_button.click() # click the clapping button 50 times
+        time.sleep(1)
+
+        # --- Commenting Part ---
+        standard_comments = ["Great 🤩",
+            "Amazing 😍",
+            "Love it ❤️",
+            "Looks nice 👌",
+            "WoW 🤯",
+            "Unbelievable 🙀",
+            "Impressive 👏", 
+            "Fantastic 🌟",
+            "Incredible 🚀",
+            "Mind-blowing 🤯",
+            "Brilliant 💡",
+            "Astonishing 🌈",
+            "Exceptional 💪",
+            "Outstanding 🏆",]
+
+        comment_button = WebDriverWait(driver=driver, timeout=10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "button[aria-label='responses']"))) # Wait for the html to load and get comment button
+        comment_button.click() # click the comment button
+
+        comment_textbox_div = WebDriverWait(driver=driver, timeout=10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "div[role='textbox']"))) # Wait for the html to load and get textBox div for writing comments
+        
+        # This part is for entering the comment into the textbox, since send_keys() function in selenium cannot send non-BMP unicode chars like emojis, I had to do something like copy and pasting it.
+        pyperclip.copy(random.choice(standard_comments))
+        act = ActionChains(driver)
+        act.key_down(Keys.CONTROL).send_keys("v").key_up(Keys.CONTROL).perform()
+
+        respond_button = WebDriverWait(driver=driver, timeout=10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "button[data-testid='ResponseRespondButton']"))) # Wait for the html to load and get respond button
+        respond_button.click() # click respond button
+
+        driver.back() # go back
+        a+=1 
+        if last_n_articles == -1 and len(search)==a: # If all articles are clapped
+            break
+        if a == last_n_articles:
+            break
+
+    time.sleep(1)
+    driver.quit()
