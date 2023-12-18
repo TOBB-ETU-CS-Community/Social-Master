@@ -20,9 +20,9 @@ def main():
 
     show_pages(
         [
-            Page("insta_bot/app.py", "Social Media Manager", "📱"),
-            Page("insta_bot/pages/instagram.py", "Instagram Manager", "📸"),
-            Page("insta_bot/pages/medium.py", "Medium Manager", "📰"),
+            Page("social_master/app.py", "Social Media Manager", "📱"),
+            Page("social_master/pages/instagram.py", "Instagram Manager", "📸"),
+            Page("social_master/pages/medium.py", "Medium Manager", "📰"),
         ]
     )
 

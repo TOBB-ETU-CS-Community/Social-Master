@@ -4,6 +4,6 @@ chcp 65001
 
 cd ..
 
-poetry run streamlit run "insta_bot\app.py"
+poetry run streamlit run "social_master\app.py"
 
 pause

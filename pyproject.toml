@@ -13,6 +13,7 @@ webdriver-manager = "^4.0.0"
 seleniumbase = "^4.17.1"
 chromedriver-py = "^115.0.5790.170"
 st-pages = "^0.4.5"
+chromedriver-autoinstaller = "^0.6.3"
 
 
 [tool.poetry.group.dev.dependencies]
