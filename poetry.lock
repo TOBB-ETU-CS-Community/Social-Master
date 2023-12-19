@@ -326,14 +326,14 @@ packaging = ">=23.1"
 
 [[package]]
 name = "chromedriver-py"
-version = "115.0.5790.170"
+version = "120.0.6099.109"
 description = "chromedriver binaries for all platforms"
 category = "main"
 optional = false
 python-versions = "*"
 files = [
-    {file = "chromedriver-py-115.0.5790.170.tar.gz", hash = "sha256:bda1eb643ae263543e34fc6f3384dc5028f892b3887b7dbb99cbe87db8e953bf"},
-    {file = "chromedriver_py-115.0.5790.170-py3-none-any.whl", hash = "sha256:152c101e8a891cf653ab45fedb9b5cc96e13f59e858517e202e5fedc5323acd3"},
+    {file = "chromedriver-py-120.0.6099.109.tar.gz", hash = "sha256:37538a09985c4195faab7c6f8ad48ba5f0bbb58ed1431d995887e1c9ef2fe4e6"},
+    {file = "chromedriver_py-120.0.6099.109-py3-none-any.whl", hash = "sha256:2bb2e8025dcb7b2b420afe05371b38ded3ad4b9abb20883f4a4672545d82485b"},
 ]
 
 [[package]]
@@ -2204,4 +2204,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "10f484826f71e156fc014cf403761ec5a60a9df67232071cec02aa8f02244cef"
+content-hash = "99154f999399ad8b465d234874a53d18a562f19890909e32ec37e1cfd2122dfb"
