@@ -72,83 +72,46 @@ def local_css(file_name):
     </style>"""
     st.markdown(style, unsafe_allow_html=True)
 
-
-# --- Find the path of a folder using part of a directory ---
-def find_path(name: str, path: str) -> str:
-    for root , dirs, files in os.walk(path):
-        for d in dirs:
-            dir = os.path.join(root,d)
-            nameparts = []
-            nameparts.append(os.path.join(path,name).split("\\")[-1])
-            for p in os.path.join(path,name).split("\\")[:-1]:
-                if p not in dir.split("\\"):
-                    nameparts.append(p)
-            nm = "\\".join(nameparts)
-            if(os.path.join(root,nm) == dir):
-                return os.path.join(root,nm)
-    return "None"
-
-# --- Find Chrome User Data, search it through C and D drives. Works for Windows ---
-def find_chrome_user_data() -> str:
-    drives = ["C:\\","D:\\"]
-    for drive in range(len(drives)):
-        USER_DATA_PATH = find_path("Google\\Chrome\\User Data",drives[drive])
-        if USER_DATA_PATH != "None":
-            print("Found Chrome User Data Path: "+USER_DATA_PATH)
-            return USER_DATA_PATH
-    return "None"
-
 # --- Setup Chrome Driver ---
 def setup_chrome_driver() -> webdriver.Chrome:
-    USER_DATA_PATH : str = find_chrome_user_data()
-    assert USER_DATA_PATH != "None", "Google Chrome User Data not found"
     options = webdriver.ChromeOptions()
     options.add_argument("--headless=new")
-    options.add_argument(f"--user-data-dir={USER_DATA_PATH}") #e.g. C:\Users\You\AppData\Local\Google\Chrome\User Data
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()),options=options)
     return driver
 
 # --- Main Function for finding and clapping articles ---
 def find_articles_and_clap(medium_page_url: str, last_n_articles=-1) -> None:
-    try:
-        driver = setup_chrome_driver()
-    except SessionNotCreatedException as error:
-        print("This program works when all current chrome sessions/pages are closed, you have open chrome sessions, please run the program again after closing them.")
-        return
+    
+    driver = setup_chrome_driver()
+    # --- Input medium account email ---
+    signin_email = input("Enter your email: ")
+    
     driver.get(medium_page_url) # Go to the medium profile page
-    a = 0
-    while True:
-        print("Article number: ",(a+1))
-        search : list = WebDriverWait(driver=driver, timeout=10).until(
-                    EC.presence_of_all_elements_located((By.CSS_SELECTOR,"article"))
-        ) # Wait and get the list of articles
-        href = WebDriverWait(driver=driver, timeout=10).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR,"a"))
-        ) # Wait until the articles are clickable
-        href = search[a].find_element(by=By.CSS_SELECTOR, value = "a") # Get the next article to be clicked
-        href.click() # click the article
-        clap_button = WebDriverWait(driver=driver, timeout=10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "button[data-testid='headerClapButton']"))) # Wait for the page to load and get clapping button
-        for _ in range(50):
-            clap_button.click() # click the clapping button 50 times
-        time.sleep(1)
-        driver.back() # go back
-        a+=1 
-        if last_n_articles == -1 and len(search)==a: # If all articles are clapped
-            break
-        if a == last_n_articles:
-            break
-
     time.sleep(1)
-    driver.quit()
+    
+    # --- Sign In Part ---
+    signin_button = WebDriverWait(driver=driver, timeout=10).until(EC.presence_of_element_located((By.CSS_SELECTOR, "a[data-testid='headerSignInButton']"))) # Get sign in button
+    # signin_button = driver.find_element(By.CSS_SELECTOR,"a[data-testid='headerSignInButton']")
+    driver.get(signin_button.get_property("href")) # Click sign in button href
+    time.sleep(1)
+    # This part down here is for getting Sign In with Email button, since there is no id or distinct class or etc. on it.
+    buttons = WebDriverWait(driver=driver, timeout=10).until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, "button")))
+    for b in buttons:
+        try:
+            if "email" in b.find_element(by=By.CSS_SELECTOR, value="div").text:
+                b.click()
+        except:
+            pass
 
-# --- Main Function for finding, clapping and commenting on articles ---
-def find_articles_clap_and_comment(medium_page_url: str, last_n_articles=-1) -> None:
-    try:
-        driver = setup_chrome_driver()
-    except SessionNotCreatedException as error:
-        print("This program works when all current chrome sessions/pages are closed, you have open chrome sessions, please run the program again after closing them.")
-        return
-    driver.get(medium_page_url) # Go to the medium profile page
+    # --- Entering Email for confirmation ---
+    input_space = WebDriverWait(driver=driver, timeout=10).until(EC.presence_of_element_located((By.CSS_SELECTOR, "input"))) # Get input space for the email for sending confirmation mail
+    input_space.send_keys(signin_email)
+    time.sleep(0.02)
+    input_space.send_keys(Keys.ENTER)
+
+    confirmation_link = input("Enter the sign in to medium confirmation link that must have been sent to the email you provided: ") # Input confirmation link from the mail that has been sent to the email user provided
+    driver.get(confirmation_link)
+
     a = 0
     while True:
 
@@ -191,13 +154,20 @@ def find_articles_clap_and_comment(medium_page_url: str, last_n_articles=-1) -> 
         comment_textbox_div = WebDriverWait(driver=driver, timeout=10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "div[role='textbox']"))) # Wait for the html to load and get textBox div for writing comments
         
         # This part is for entering the comment into the textbox, since send_keys() function in selenium cannot send non-BMP unicode chars like emojis, I had to do something like copy and pasting it.
-        pyperclip.copy(random.choice(standard_comments))
+        chosen_comment = random.choice(standard_comments)
+        pyperclip.copy(chosen_comment)
         act = ActionChains(driver)
         act.key_down(Keys.CONTROL).send_keys("v").key_up(Keys.CONTROL).perform()
+        print("copy-paste comment: "+chosen_comment)
 
-        respond_button = WebDriverWait(driver=driver, timeout=10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "button[data-testid='ResponseRespondButton']"))) # Wait for the html to load and get respond button
+        time.sleep(0.05)
+        try:
+            respond_button = WebDriverWait(driver=driver, timeout=2).until(EC.element_to_be_clickable((By.CSS_SELECTOR, "button[data-testid='ResponseRespondButton']"))) # Wait for the html to load and get respond button
+        except:
+            respond_button = WebDriverWait(driver=driver, timeout=10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "button[data-testid='ResponseRespondButton']"))) # Wait for the html to load and get respond button
         respond_button.click() # click respond button
-
+        print("respond button clicked")
+        time.sleep(0.2)
         driver.back() # go back
         a+=1 
         if last_n_articles == -1 and len(search)==a: # If all articles are clapped
