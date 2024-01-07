@@ -11,6 +11,19 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from st_pages import Page, show_pages
 
+if "login" not in st.session_state:
+    st.session_state.login = False
+if "login_button_clicked" not in st.session_state:
+    st.session_state.login_button_clicked = False
+if "driver" not in st.session_state:
+    st.session_state.driver = None
+if "home_page" not in st.session_state:
+    st.session_state.home_page = None
+if "login_page" not in st.session_state:
+    st.session_state.login_page = None
+if "profile_page" not in st.session_state:
+    st.session_state.profile_page = None
+
 
 def get_random_delay(delay_range: list[float] = [1, 5]):
     delay = random.uniform(*delay_range)
