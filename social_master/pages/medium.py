@@ -9,6 +9,9 @@ from PIL import Image
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
 from st_pages import Page, show_pages
 
 if "login" not in st.session_state:
@@ -23,6 +26,67 @@ if "login_page" not in st.session_state:
     st.session_state.login_page = None
 if "profile_page" not in st.session_state:
     st.session_state.profile_page = None
+if "mail_auth" not in st.session_state:
+    st.session_state.mail_auth = False
+
+
+class HomePage:
+    def __init__(self, driver, wait):
+        self.driver = driver
+        self.wait = wait
+
+    def go_to_login_page(self):
+        try:
+            self.driver.get("https://medium.com/m/signin")
+            goto_email_login_button = self.wait.until(
+                EC.element_to_be_clickable(
+                    (
+                        By.XPATH,
+                        "//div[text()='Sign in with email']",
+                    )
+                )
+            )
+            self.driver.execute_script(
+                "arguments[0].click();", goto_email_login_button
+            )
+        except Exception as e:
+            print(e)
+        return LoginPage(self.driver, self.wait)
+
+
+class LoginPage:
+    def __init__(self, driver, wait):
+        self.driver = driver
+        self.wait = wait
+
+    def email_login(self, email):
+        email_input = self.wait.until(
+            EC.visibility_of_element_located(
+                (By.CSS_SELECTOR, "input[aria-label='email']")
+            )
+        )
+        email_input.clear()
+        email_input.send_keys(email)
+        continue_button = self.wait.until(
+            EC.visibility_of_element_located(
+                (By.XPATH, "//button[text()='Continue']")
+            )
+        )
+        self.driver.execute_script("arguments[0].click();", continue_button)
+
+    def check_login(self):
+        get_random_delay([5, 10])
+        try:
+            login_button = self.wait.until(
+                EC.visibility_of_element_located(
+                    (By.XPATH, "//button[@type='submit']/div[text()='Log in']")
+                )
+            )
+            self.driver.execute_script("arguments[0].click();", login_button)
+            return False
+        except Exception as e:
+            print(e)
+            return True
 
 
 def get_random_delay(delay_range: list[float] = [1, 5]):
@@ -36,34 +100,7 @@ def show_screenshot(driver: st.session_state.driver or None):
     st.image(image)
 
 
-# --- Find the path of a folder using part of a directory ---
-def find_path(name: str, path: str) -> str:
-    for root, dirs, files in os.walk(path):
-        for d in dirs:
-            dir = os.path.join(root, d)
-            nameparts = []
-            nameparts.append(os.path.join(path, name).split("\\")[-1])
-            for p in os.path.join(path, name).split("\\")[:-1]:
-                if p not in dir.split("\\"):
-                    nameparts.append(p)
-            nm = "\\".join(nameparts)
-            if os.path.join(root, nm) == dir:
-                return os.path.join(root, nm)
-    return "None"
-
-
-# --- Find Chrome User Data, search it through C and D drives. Works for Windows ---
-def find_chrome_user_data() -> str:
-    drives = ["C:\\", "D:\\"]
-    for drive in range(len(drives)):
-        USER_DATA_PATH = find_path("Google\\Chrome\\User Data", drives[drive])
-        if USER_DATA_PATH != "None":
-            print("Found Chrome User Data Path: " + USER_DATA_PATH)
-            return USER_DATA_PATH
-    return "None"
-
-
-def get_driver(headful: bool = True):
+def get_driver(headful):
     options = Options()
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-blink-features=AutomationControlled")
@@ -75,10 +112,6 @@ def get_driver(headful: bool = True):
     options.add_argument("--incognito")
     if not headful:
         options.add_argument("--headless")
-    USER_DATA_PATH = (
-        "C:\\Users\\NEO\\AppData\\Local\\Google\\Chrome\\User Data"
-    )
-    options.add_argument(f"--user-data-dir={USER_DATA_PATH}")
 
     service = Service(executable_path=binary_path)
 
@@ -90,38 +123,25 @@ def get_driver(headful: bool = True):
     return driver
 
 
-def find_articles_and_clap(medium_page_url: str, last_n_articles=-1) -> None:
-    driver = get_driver()
-    driver.get(medium_page_url)  # Go to the medium profile page
-    """
-    while True:
-        print("Article number: ", (a + 1))
-        search: list = WebDriverWait(driver=driver, timeout=10).until(
-            EC.presence_of_all_elements_located((By.CSS_SELECTOR, "article"))
-        )  # Wait and get the list of articles
-        href = WebDriverWait(driver=driver, timeout=10).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, "a"))
-        )  # Wait until the articles are clickable
-        href = search[a].find_element(
-            by=By.CSS_SELECTOR, value="a"
-        )  # Get the next article to be clicked
-        href.click()  # click the article
-        clap_button = WebDriverWait(driver=driver, timeout=10).until(
-            EC.visibility_of_element_located(
-                (By.CSS_SELECTOR, "button[data-testid='headerClapButton']")
-            )
-        )  # Wait for the page to load and get clapping button
-        for _ in range(50):
-            clap_button.click()  # click the clapping button 50 times
-        time.sleep(1)
-        driver.back()  # go back
-        a += 1
-        if last_n_articles == -1 and len(search) == a:  # If all articles are clapped
-            break
-        if a == last_n_articles:
-            break
-    """
-    driver.quit()
+def start_automation(headful):
+    error = None
+    login = False
+    try:
+        driver = get_driver(headful)
+        st.session_state.driver = driver
+        wait = WebDriverWait(driver, 5)
+        home_page = HomePage(driver, wait)
+        st.session_state.home_page = home_page
+        login_page = home_page.go_to_login_page()
+        st.session_state.login_page = login_page
+        login_page.email_login(st.session_state.email.lower())
+        # login = login_page.check_login()
+    except Exception as e:
+        print(e)
+        error = e
+
+    finally:
+        return [login, error]
 
 
 def main():
@@ -153,13 +173,17 @@ def main():
 
     with st.sidebar:
         st.text_input("Please enter your email:", key="email")
-        st.text_input(
-            "Please enter your passcode sent to your email:", key="passcode"
-        )
+        if st.session_state.mail_auth:
+            st.text_input(
+                "Please enter your passcode sent to your email:",
+                key="passcode",
+            )
         with st.expander("Extra Configurations"):
             st.checkbox("Headful")
         button = st.button("Login Account")
         if button:
+            st.session_state.login, error = start_automation(headful=True)
+            st.error(error)
             placeholder = st.sidebar.empty()
             if st.session_state.login:
                 with placeholder.container():
@@ -200,12 +224,6 @@ def main():
                 show_screenshot()
     else:
         st.warning(body="Please login first.", icon="⚠️")
-
-    if st.button("clap"):
-        find_articles_and_clap(
-            medium_page_url="https://medium.com/@aifastcash",
-            last_n_articles=10,
-        )
 
 
 if __name__ == "__main__":
