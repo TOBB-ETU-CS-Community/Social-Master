@@ -60,19 +60,34 @@ class LoginPage:
         self.wait = wait
 
     def email_login(self, email):
-        email_input = self.wait.until(
-            EC.visibility_of_element_located(
-                (By.CSS_SELECTOR, "input[aria-label='email']")
+        try:
+            email_input = self.wait.until(
+                EC.visibility_of_element_located(
+                    (By.CSS_SELECTOR, "input[aria-label='email']")
+                )
             )
-        )
-        email_input.clear()
-        email_input.send_keys(email)
-        continue_button = self.wait.until(
-            EC.visibility_of_element_located(
-                (By.XPATH, "//button[text()='Continue']")
+            email_input.clear()
+            email_input.send_keys(email)
+            continue_button = self.wait.until(
+                EC.visibility_of_element_located(
+                    (By.XPATH, "//button[text()='Continue']")
+                )
             )
-        )
-        self.driver.execute_script("arguments[0].click();", continue_button)
+            self.driver.execute_script(
+                "arguments[0].click();", continue_button
+            )
+            return True
+        except Exception as e:
+            print(e)
+            return False
+
+    def sign_in(self, link):
+        try:
+            self.driver.get(link)
+            return True
+        except Exception as e:
+            print(e)
+            return False
 
     def check_login(self):
         get_random_delay([5, 10])
@@ -134,7 +149,8 @@ def start_automation(headful):
         st.session_state.home_page = home_page
         login_page = home_page.go_to_login_page()
         st.session_state.login_page = login_page
-        login_page.email_login(st.session_state.email.lower())
+        if login_page.email_login(st.session_state.email.lower()):
+            st.session_state.mail_auth = True
         # login = login_page.check_login()
     except Exception as e:
         print(e)
@@ -175,16 +191,27 @@ def main():
         st.text_input("Please enter your email:", key="email")
         if st.session_state.mail_auth:
             st.text_input(
-                "Please enter your passcode sent to your email:",
-                key="passcode",
+                "Please paste your sign in link sent to your email:",
+                key="signin_link",
             )
         with st.expander("Extra Configurations"):
             st.checkbox("Headful")
-        button = st.button("Login Account")
-        if button:
-            st.session_state.login, error = start_automation(headful=True)
-            st.error(error)
+        if not st.session_state.mail_auth:
+            button = st.button("Send Sign in Link to Email")
+            if button:
+                st.session_state.login, error = start_automation(headful=True)
+                if error:
+                    st.error(error)
+                placeholder = st.sidebar.empty()
+        else:
+            button = st.button("Sign in using Email Link")
+            if button:
+                st.session_state.login = st.session_state.login_page.sign_in(
+                    st.session_state.signin_link
+                )
+
             placeholder = st.sidebar.empty()
+
             if st.session_state.login:
                 with placeholder.container():
                     st.success("Medium login successful")
