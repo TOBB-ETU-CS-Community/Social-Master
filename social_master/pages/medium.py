@@ -202,6 +202,8 @@ def main():
                 st.session_state.login, error = start_automation(headful=True)
                 if error:
                     st.error(error)
+                else:
+                    st.rerun()
                 placeholder = st.sidebar.empty()
         else:
             button = st.button("Sign in using Email Link")
