@@ -204,7 +204,6 @@ def main():
                     st.error(error)
                 else:
                     st.rerun()
-                placeholder = st.sidebar.empty()
         else:
             button = st.button("Sign in using Email Link")
             if button:
