@@ -197,16 +197,14 @@ def main():
         with st.expander("Extra Configurations"):
             st.checkbox("Headful")
         if not st.session_state.mail_auth:
-            button = st.button("Send Sign in Link to Email")
-            if button:
+            if st.button("Send Sign in Link to Email"):
                 st.session_state.login, error = start_automation(headful=True)
                 if error:
                     st.error(error)
                 else:
                     st.rerun()
         else:
-            button = st.button("Sign in using Email Link")
-            if button:
+            if st.button("Sign in using Email Link"):
                 st.session_state.login = st.session_state.login_page.sign_in(
                     st.session_state.signin_link
                 )
