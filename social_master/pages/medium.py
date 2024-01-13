@@ -92,9 +92,11 @@ class LoginPage:
     def check_login(self):
         get_random_delay([5, 10])
         try:
+            self.driver.get("https://medium.com/m/signin")
             login_button = self.wait.until(
                 EC.visibility_of_element_located(
-                    (By.XPATH, "//button[@type='submit']/div[text()='Log in']")
+                    # (By.XPATH, "//button[@type='submit']/div[text()='Log in']")
+                    (By.CSS_SELECTOR, "input[aria-label='email']")
                 )
             )
             self.driver.execute_script("arguments[0].click();", login_button)
@@ -151,7 +153,7 @@ def start_automation(headful):
         st.session_state.login_page = login_page
         if login_page.email_login(st.session_state.email.lower()):
             st.session_state.mail_auth = True
-        # login = login_page.check_login()
+        login = login_page.check_login()
     except Exception as e:
         print(e)
         error = e
