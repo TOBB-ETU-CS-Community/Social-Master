@@ -20,6 +20,8 @@ if "login_button_clicked" not in st.session_state:
     st.session_state.login_button_clicked = False
 if "driver" not in st.session_state:
     st.session_state.driver = None
+if "wait" not in st.session_state:
+    st.session_state.wait = None
 if "home_page" not in st.session_state:
     st.session_state.home_page = None
 if "login_page" not in st.session_state:
@@ -140,13 +142,27 @@ def get_driver(headful):
     return driver
 
 
-def start_automation(headful):
+def start_driver(headful):
     error = None
     login = False
     try:
         driver = get_driver(headful)
         st.session_state.driver = driver
         wait = WebDriverWait(driver, 5)
+        st.session_state.wait = wait
+    except Exception as e:
+        print(e)
+        error = e
+    finally:
+        return [login, error]
+
+
+def link_signin():
+    error = None
+    login = False
+    try:
+        driver = st.session_state.driver
+        wait = st.session_state.wait
         home_page = HomePage(driver, wait)
         st.session_state.home_page = home_page
         login_page = home_page.go_to_login_page()
@@ -157,7 +173,6 @@ def start_automation(headful):
     except Exception as e:
         print(e)
         error = e
-
     finally:
         return [login, error]
 
@@ -200,7 +215,7 @@ def main():
             st.checkbox("Headful")
         if not st.session_state.mail_auth:
             if st.button("Send Sign in Link to Email"):
-                st.session_state.login, error = start_automation(headful=True)
+                st.session_state.login, error = start_driver(headful=True)
                 if error:
                     st.error(error)
                 else:
