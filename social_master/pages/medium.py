@@ -26,8 +26,6 @@ if "home_page" not in st.session_state:
     st.session_state.home_page = None
 if "login_page" not in st.session_state:
     st.session_state.login_page = None
-if "profile_page" not in st.session_state:
-    st.session_state.profile_page = None
 if "mail_auth" not in st.session_state:
     st.session_state.mail_auth = False
 
